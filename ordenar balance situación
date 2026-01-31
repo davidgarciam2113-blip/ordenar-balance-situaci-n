@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Balance: ordenar y clasificar</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 0; background: #f6f7fb; color: #111; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+    .card { background: white; border-radius: 14px; padding: 16px; box-shadow: 0 6px 20px rgba(0,0,0,.06); margin: 12px 0; }
+    h1 { font-size: 20px; margin: 0 0 6px; }
+    h2 { font-size: 16px; margin: 0 0 8px; }
+    h3 { font-size: 14px; margin: 0 0 8px; }
+    .muted { color: #555; font-size: 13px; }
+    label { font-weight: 700; font-size: 13px; display:block; margin-bottom: 6px; }
+
+    input, select, button {
+      font-size: 16px; padding: 10px 12px; border-radius: 10px;
+      border: 1px solid #d8dbe6; width: 100%; box-sizing: border-box;
+    }
+    button { border: 0; background: #2563eb; color: white; font-weight: 800; cursor: pointer; }
+    button.secondary { background: #111827; }
+    button.ghost { background: transparent; color: #111; border: 1px solid #d8dbe6; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+
+    .row { display:grid; grid-template-columns: 1fr; gap: 10px; }
+    @media (min-width: 900px){ .row { grid-template-columns: 1.2fr 1fr 1fr; } }
+
+    .grid { display:grid; gap: 12px; }
+    @media (min-width: 900px){ .grid { grid-template-columns: 1fr 1fr; } }
+
+    .pill { display:inline-block; padding: 4px 10px; border-radius: 999px; background:#eef2ff; color:#1e40af; font-weight:800; font-size: 12px; }
+
+    .box { border: 1px solid #eef0f7; border-radius: 12px; padding: 12px; background: #fafbff; }
+    .cols3 { display:grid; gap: 12px; }
+    @media (min-width: 900px){ .cols3 { grid-template-columns: 1fr 1fr 1fr; } }
+
+    .itemlist { list-style: none; padding: 0; margin: 0; display:grid; gap: 8px; }
+    .item {
+      display:flex; align-items:center; justify-content:space-between; gap: 10px;
+      border: 1px solid #e7e9f3; background: white; border-radius: 12px; padding: 10px;
+    }
+    .item strong { font-size: 14px; }
+    .actions { display:flex; gap: 8px; }
+    .mini { width:auto; padding: 8px 10px; border-radius: 10px; font-weight: 800; }
+    .mini.up { background:#0f172a; }
+    .mini.down { background:#0f172a; }
+    .mini.del { background:#dc2626; }
+
+    .result { white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: #0b1220; color: #e5e7eb; padding: 12px; border-radius: 12px; overflow:auto;
+    }
+    .kpi { display:flex; flex-wrap:wrap; gap: 10px; align-items:center; }
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <div class="card">
+    <h1>Balance: clasificar y ordenar</h1>
+    <div class="muted">
+      Coloca cada elemento en su masa patrimonial. En el <b>Activo</b>, de <b>menor (arriba) a mayor liquidez</b>.
+      En el <b>Pasivo</b>, de <b>menor (arriba) a mayor exigibilidad</b>.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div>
+        <label>Nombre y apellidos</label>
+        <input id="alumno" placeholder="Ej: Laura García López" autocomplete="name">
+      </div>
+
+      <div>
+        <label>Número de elementos</label>
+        <select id="num">
+          <option value="15">15</option>
+          <option value="20" selected>20</option>
+          <option value="30">30</option>
+          <option value="35">35</option>
+          <option value="50">Todos (50)</option>
+        </select>
+      </div>
+
+      <div style="display:grid; gap:10px;">
+        <button id="btnStart">Empezar</button>
+        <button id="btnFinish" class="secondary" disabled>Finalizar y corregir</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="zonaColocacion" style="display:none;">
+    <div class="kpi">
+      <span class="pill" id="estado">—</span>
+      <span class="pill" id="pendientes">—</span>
+    </div>
+    <div style="height:10px;"></div>
+
+    <div class="grid">
+      <!-- Panel de colocación -->
+      <div class="box">
+        <h2>Elemento actual</h2>
+        <div class="muted">Selecciona dónde colocarlo y pulsa <b>Colocar</b>.</div>
+        <div style="height:10px;"></div>
+
+        <div class="box" style="background:white;">
+          <div><strong id="elemActual">—</strong></div>
+          <div class="muted" id="hintActual">—</div>
+        </div>
+
+        <div style="height:10px;"></div>
+
+        <label>¿Dónde lo colocas?</label>
+        <select id="destino">
+          <optgroup label="ACTIVO (orden: menor → mayor liquidez)">
+            <option value="ANC">Activo no corriente</option>
+            <option value="AC">Activo corriente</option>
+          </optgroup>
+          <optgroup label="PATRIMONIO NETO">
+            <option value="PN">Patrimonio neto</option>
+          </optgroup>
+          <optgroup label="PASIVO (orden: menor → mayor exigibilidad)">
+            <option value="PNC">Pasivo no corriente</option>
+            <option value="PC">Pasivo corriente</option>
+          </optgroup>
+        </select>
+
+        <div style="height:10px;"></div>
+
+        <button id="btnPlace">Colocar en la plantilla</button>
+
+        <div style="height:12px;"></div>
+        <div class="muted small">
+          Puedes ajustar el orden dentro de cada bloque con ↑ ↓ (lo que pongas arriba se considera “menor liquidez/exigibilidad”).
+        </div>
+      </div>
+
+      <!-- Plantilla de balance -->
+      <div class="box">
+        <h2>Plantilla de balance</h2>
+        <div class="muted">Ordena dentro de cada bloque.</div>
+        <div style="height:10px;"></div>
+
+        <div class="cols3">
+          <div class="box">
+            <h3>ACTIVO</h3>
+
+            <div class="box" style="margin-top:8px;">
+              <div class="muted"><b>Activo no corriente</b> (menor liquidez)</div>
+              <ul class="itemlist" id="list_ANC"></ul>
+            </div>
+
+            <div class="box" style="margin-top:8px;">
+              <div class="muted"><b>Activo corriente</b> (mayor liquidez)</div>
+              <ul class="itemlist" id="list_AC"></ul>
+            </div>
+          </div>
+
+          <div class="box">
+            <h3>PATRIMONIO NETO</h3>
+            <div class="box" style="margin-top:8px;">
+              <div class="muted"><b>Patrimonio neto</b></div>
+              <ul class="itemlist" id="list_PN"></ul>
+            </div>
+          </div>
+
+          <div class="box">
+            <h3>PASIVO</h3>
+
+            <div class="box" style="margin-top:8px;">
+              <div class="muted"><b>Pasivo no corriente</b> (menor exigibilidad)</div>
+              <ul class="itemlist" id="list_PNC"></ul>
+            </div>
+
+            <div class="box" style="margin-top:8px;">
+              <div class="muted"><b>Pasivo corriente</b> (mayor exigibilidad)</div>
+              <ul class="itemlist" id="list_PC"></ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="zonaResultados" style="display:none;">
+    <h2>Corrección</h2>
+    <div id="resumen"></div>
+    <div style="height:10px;"></div>
+
+    <div class="box">
+      <h3>Errores detectados</h3>
+      <div class="result" id="erroresTxt">—</div>
+    </div>
+
+    <div style="height:12px;"></div>
+
+    <div class="box">
+      <h3>Balance correcto (ordenado)</h3>
+      <div class="muted">Este es el balance correctamente clasificado y ordenado para los elementos de este intento.</div>
+      <div style="height:10px;"></div>
+      <div class="result" id="correctoTxt">—</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ==========================================================
+   BANCO DE ELEMENTOS (50) + CLASIFICACIÓN + ORDEN
+   - bucket: ANC / AC / PN / PNC / PC
+   - rank: orden interno (menor->mayor liquidez/exigibilidad)
+   ========================================================== */
+
+const BANK = [
+  // ACTIVO NO CORRIENTE (menor liquidez) — rangos 10-29
+  { name:"Aplicaciones informáticas", bucket:"ANC", rank:10, hint:"Intangible: muy poca liquidez." },
+  { name:"Propiedad industrial", bucket:"ANC", rank:11, hint:"Intangible: muy poca liquidez." },
+  { name:"Patentes", bucket:"ANC", rank:12, hint:"Intangible: muy poca liquidez." },
+  { name:"Fondo de comercio", bucket:"ANC", rank:13, hint:"Intangible: muy poca liquidez." },
+  { name:"Terrenos y bienes naturales", bucket:"ANC", rank:14, hint:"Inmovilizado material: baja liquidez." },
+  { name:"Construcciones", bucket:"ANC", rank:15, hint:"Inmovilizado material: baja liquidez." },
+  { name:"Instalaciones técnicas", bucket:"ANC", rank:16, hint:"Inmovilizado material: baja liquidez." },
+  { name:"Maquinaria", bucket:"ANC", rank:17, hint:"Inmovilizado material: baja liquidez." },
+  { name:"Utillaje", bucket:"ANC", rank:18, hint:"Inmovilizado material: baja liquidez." },
+  { name:"Mobiliario", bucket:"ANC", rank:19, hint:"Inmovilizado material: baja liquidez." },
+  { name:"Equipos para procesos de información", bucket:"ANC", rank:20, hint:"Inmovilizado material: baja liquidez." },
+  { name:"Elementos de transporte", bucket:"ANC", rank:21, hint:"Inmovilizado material: baja liquidez." },
+  { name:"Inmovilizado en curso", bucket:"ANC", rank:22, hint:"Todavía no está en uso: muy poca liquidez." },
+  { name:"Inversiones financieras a largo plazo", bucket:"ANC", rank:24, hint:"Inmovilizado financiero: baja liquidez." },
+
+  // ACTIVO CORRIENTE (mayor liquidez) — rangos 30-49
+  { name:"Existencias", bucket:"AC", rank:30, hint:"Existencias: menos líquido dentro del corriente." },
+  { name:"Mercaderías", bucket:"AC", rank:31, hint:"Existencias: menos líquido dentro del corriente." },
+  { name:"Materias primas", bucket:"AC", rank:32, hint:"Existencias: menos líquido dentro del corriente." },
+  { name:"Productos en curso", bucket:"AC", rank:33, hint:"Existencias: menos líquido dentro del corriente." },
+  { name:"Productos terminados", bucket:"AC", rank:34, hint:"Existencias: menos líquido dentro del corriente." },
+  { name:"Envases y embalajes", bucket:"AC", rank:35, hint:"Existencias: menos líquido dentro del corriente." },
+  { name:"Anticipos a proveedores", bucket:"AC", rank:36, hint:"Derecho a recibir bienes/servicios: realizable." },
+  { name:"Clientes", bucket:"AC", rank:38, hint:"Realizable: cobro de ventas." },
+  { name:"Clientes, efectos comerciales a cobrar", bucket:"AC", rank:39, hint:"Realizable: efectos a cobrar." },
+  { name:"Efectos comerciales a cobrar", bucket:"AC", rank:40, hint:"Realizable: efectos a cobrar." },
+  { name:"Deudores", bucket:"AC", rank:41, hint:"Realizable: cobros pendientes." },
+  { name:"Deudores varios", bucket:"AC", rank:42, hint:"Realizable: cobros pendientes." },
+  { name:"Hacienda Pública deudora", bucket:"AC", rank:43, hint:"Realizable: impuestos a recuperar." },
+  { name:"Inversiones financieras a corto plazo", bucket:"AC", rank:44, hint:"Casi dinero: alta liquidez." },
+  { name:"Bancos", bucket:"AC", rank:47, hint:"Disponible: muy líquido." },
+  { name:"Caja", bucket:"AC", rank:48, hint:"Disponible: el más líquido." },
+
+  // PATRIMONIO NETO — rangos 50-59 (orden interno no crítico, pero lo fijamos)
+  { name:"Capital social", bucket:"PN", rank:50, hint:"Patrimonio neto." },
+  { name:"Reservas legales", bucket:"PN", rank:51, hint:"Patrimonio neto." },
+  { name:"Reservas voluntarias", bucket:"PN", rank:52, hint:"Patrimonio neto." },
+  { name:"Resultados de ejercicios anteriores", bucket:"PN", rank:53, hint:"Patrimonio neto." },
+  { name:"Resultado del ejercicio", bucket:"PN", rank:54, hint:"Patrimonio neto." },
+  { name:"Prima de emisión", bucket:"PN", rank:55, hint:"Patrimonio neto." },
+  { name:"Subvenciones oficiales de capital", bucket:"PN", rank:56, hint:"Patrimonio neto (subvenciones)." },
+  { name:"Capital pendiente de desembolso", bucket:"PN", rank:57, hint:"Patrimonio neto (según enfoque didáctico habitual)." },
+
+  // PASIVO NO CORRIENTE (menor exigibilidad) — rangos 60-69
+  { name:"Empréstitos", bucket:"PNC", rank:60, hint:"Deuda a largo plazo: poca exigibilidad inmediata." },
+  { name:"Préstamos a largo plazo", bucket:"PNC", rank:61, hint:"Deuda a largo plazo." },
+  { name:"Deudas a largo plazo con entidades de crédito", bucket:"PNC", rank:62, hint:"Deuda a largo plazo." },
+  { name:"Proveedores de inmovilizado a largo plazo", bucket:"PNC", rank:63, hint:"Obligación a largo plazo." },
+  { name:"Provisiones a largo plazo", bucket:"PNC", rank:64, hint:"Obligaciones futuras: largo plazo." },
+  { name:"Pasivo por impuesto diferido", bucket:"PNC", rank:65, hint:"Obligación fiscal futura: largo plazo." },
+
+  // PASIVO CORRIENTE (mayor exigibilidad) — rangos 70-79
+  { name:"Proveedores", bucket:"PC", rank:70, hint:"Exigible a corto: proveedores." },
+  { name:"Acreedores", bucket:"PC", rank:71, hint:"Exigible a corto." },
+  { name:"Deudas a corto plazo con entidades de crédito", bucket:"PC", rank:72, hint:"Exigible a corto: bancos." },
+  { name:"Hacienda Pública acreedora", bucket:"PC", rank:73, hint:"Exigible a corto: impuestos." },
+  { name:"Organismos de la Seguridad Social acreedores", bucket:"PC", rank:74, hint:"Exigible a corto: SS." },
+  { name:"Remuneraciones pendientes de pago", bucket:"PC", rank:75, hint:"Exigible a muy corto: salarios." }
+];
+
+const BY_NAME = Object.fromEntries(BANK.map(x => [x.name, x]));
+const ALL_NAMES = BANK.map(x => x.name);
+
+const BUCKETS = [
+  { key:"ANC", label:"Activo no corriente" },
+  { key:"AC", label:"Activo corriente" },
+  { key:"PN", label:"Patrimonio neto" },
+  { key:"PNC", label:"Pasivo no corriente" },
+  { key:"PC", label:"Pasivo corriente" }
+];
+
+const NOTA_MAX = 10;
+
+let attempt = null; // { alumno, items[], idx, placed: {bucket: [names...] } }
+
+const $ = (id) => document.getElementById(id);
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function initAttempt(){
+  const alumno = $("alumno").value.trim();
+  if(alumno.length < 3){
+    alert("Escribe nombre y apellidos (mínimo 3 caracteres).");
+    return;
+  }
+  const n = parseInt($("num").value, 10);
+  const items = shuffle(ALL_NAMES).slice(0, Math.min(n, ALL_NAMES.length));
+
+  attempt = {
+    alumno,
+    items,
+    idx: 0,
+    placed: { ANC:[], AC:[], PN:[], PNC:[], PC:[] }
+  };
+
+  $("zonaResultados").style.display = "none";
+  $("zonaColocacion").style.display = "";
+  $("btnFinish").disabled = true;
+
+  renderCurrent();
+  renderLists();
+  updateBadges();
+}
+
+function updateBadges(){
+  const total = attempt.items.length;
+  const placedCount = BUCKETS.reduce((s,b)=> s + attempt.placed[b.key].length, 0);
+  $("estado").textContent = `Alumno: ${attempt.alumno}`;
+  $("pendientes").textContent = `Colocados: ${placedCount}/${total}`;
+  $("btnFinish").disabled = placedCount !== total;
+}
+
+function renderCurrent(){
+  const total = attempt.items.length;
+  if(attempt.idx >= total){
+    // si ya pasó de todos, mostramos el primero no colocado
+    const next = attempt.items.find(name => !isPlaced(name));
+    if(next){
+      $("elemActual").textContent = next;
+      $("hintActual").textContent = BY_NAME[next].hint || "";
+      return;
+    }
+    $("elemActual").textContent = "✅ Todo colocado";
+    $("hintActual").textContent = "Ya puedes finalizar y corregir.";
+    return;
+  }
+
+  // buscar el siguiente no colocado a partir del idx
+  let i = attempt.idx;
+  while(i < total && isPlaced(attempt.items[i])) i++;
+  attempt.idx = i;
+
+  const name = (i < total) ? attempt.items[i] : null;
+  if(!name){
+    $("elemActual").textContent = "✅ Todo colocado";
+    $("hintActual").textContent = "Ya puedes finalizar y corregir.";
+    return;
+  }
+  $("elemActual").textContent = name;
+  $("hintActual").textContent = BY_NAME[name].hint || "";
+}
+
+function isPlaced(name){
+  return BUCKETS.some(b => attempt.placed[b.key].includes(name));
+}
+
+function removeFromAll(name){
+  BUCKETS.forEach(b => {
+    const arr = attempt.placed[b.key];
+    const idx = arr.indexOf(name);
+    if(idx >= 0) arr.splice(idx, 1);
+  });
+}
+
+function placeCurrent(){
+  const name = $("elemActual").textContent;
+  if(!name || name.startsWith("✅")) return;
+
+  const dest = $("destino").value; // ANC/AC/PN/PNC/PC
+  removeFromAll(name);
+  attempt.placed[dest].push(name);
+
+  attempt.idx += 1;
+  renderCurrent();
+  renderLists();
+  updateBadges();
+}
+
+function moveItem(bucket, idx, dir){
+  const arr = attempt.placed[bucket];
+  const j = idx + dir;
+  if(j < 0 || j >= arr.length) return;
+  [arr[idx], arr[j]] = [arr[j], arr[idx]];
+  renderLists();
+}
+
+function deleteItem(bucket, idx){
+  attempt.placed[bucket].splice(idx, 1);
+  renderCurrent();
+  renderLists();
+  updateBadges();
+}
+
+function renderLists(){
+  for(const b of BUCKETS){
+    const ul = $("list_" + b.key);
+    ul.innerHTML = "";
+    attempt.placed[b.key].forEach((name, idx) => {
+      const li = document.createElement("li");
+      li.className = "item";
+      li.innerHTML = `
+        <div style="min-width:0;">
+          <strong>${name}</strong>
+          <div class="muted" style="font-size:12px;">${b.label}</div>
+        </div>
+        <div class="actions">
+          <button class="mini up" title="Subir">↑</button>
+          <button class="mini down" title="Bajar">↓</button>
+          <button class="mini del" title="Quitar">✕</button>
+        </div>
+      `;
+      const [btnUp, btnDown, btnDel] = li.querySelectorAll("button");
+      btnUp.onclick = () => moveItem(b.key, idx, -1);
+      btnDown.onclick = () => moveItem(b.key, idx, +1);
+      btnDel.onclick = () => deleteItem(b.key, idx);
+      ul.appendChild(li);
+    });
+  }
+}
+
+function sortCorrectForBucket(bucketKey){
+  // Orden correcto por rank (y por nombre para empates)
+  return [...attempt.items]
+    .filter(n => BY_NAME[n].bucket === bucketKey)
+    .sort((a,b) => (BY_NAME[a].rank - BY_NAME[b].rank) || a.localeCompare(b, "es"));
+}
+
+function grade(){
+  const total = attempt.items.length;
+
+  // Construimos mapa: dónde lo puso el alumno
+  const studentBucket = {};
+  BUCKETS.forEach(b => attempt.placed[b.key].forEach(n => studentBucket[n] = b.key));
+
+  const mistakes = [];
+  let correct = 0;
+
+  // Para orden: comparamos secuencia alumno vs secuencia correcta en cada bucket.
+  for(const b of BUCKETS){
+    const correctSeq = sortCorrectForBucket(b.key); // SOLO elementos de este intento que van aquí
+    const studentSeq = attempt.placed[b.key];
+
+    // 1) elementos que están en bucket incorrecto
+    for(const n of attempt.items){
+      const expectedB = BY_NAME[n].bucket;
+      const gotB = studentBucket[n];
+      if(!gotB){
+        mistakes.push(`SIN COLOCAR: ${n} → debería ir en ${labelBucket(expectedB)}.`);
+      } else if(gotB !== expectedB){
+        mistakes.push(`MASA INCORRECTA: ${n} → pusiste ${labelBucket(gotB)}, correcta: ${labelBucket(expectedB)}.`);
+      }
+    }
+
+    // 2) orden dentro del bucket: posición exacta comparando con el orden correcto
+    // Solo evaluamos orden si el alumno lo puso en el bucket correcto.
+    const studentCorrectOnly = studentSeq.filter(n => BY_NAME[n].bucket === b.key);
+    const correctOnly = correctSeq;
+
+    // Si faltan o sobran, igualmente comparamos por índice hasta min
+    const len = Math.min(studentCorrectOnly.length, correctOnly.length);
+    for(let i=0;i<len;i++){
+      if(studentCorrectOnly[i] === correctOnly[i]){
+        // cuenta como correcto (masa correcta y posición correcta dentro del bloque)
+        correct++;
+      } else {
+        // Solo marcamos error de orden si el elemento está en masa correcta
+        // y su posición no coincide con el balance ordenado
+        mistakes.push(`ORDEN: en ${labelBucket(b.key)}, en la posición ${i+1} pusiste "${studentCorrectOnly[i]}", debería ir "${correctOnly[i]}".`);
+      }
+    }
+
+    // Los correctos que estén en masa correcta pero fuera de esa comparación quedan incorrectos por orden
+    // (por ejemplo, si faltan/ sobran elementos o están permutados)
+    const extras = studentCorrectOnly.slice(len);
+    extras.forEach(n => mistakes.push(`ORDEN: "${n}" está en ${labelBucket(b.key)} pero no encaja en el orden correcto (revisa posiciones).`));
+    const missing = correctOnly.slice(len);
+    missing.forEach(n => mistakes.push(`ORDEN: falta colocar correctamente "${n}" en ${labelBucket(b.key)} según el orden.`));
+  }
+
+  // Nota: porcentaje de aciertos basado en “masa+posición correctas”
+  const pct = (correct / total) * 100;
+  const nota = Math.round(((correct / total) * NOTA_MAX) * 100) / 100;
+  const errores = total - correct;
+
+  return { total, correct, errores, pct, nota, mistakes };
+}
+
+function labelBucket(key){
+  const b = BUCKETS.find(x => x.key === key);
+  return b ? b.label : key;
+}
+
+function buildCorrectBalanceText(){
+  const lines = [];
+  lines.push("ACTIVO (menor → mayor liquidez)");
+  lines.push("  Activo no corriente:");
+  sortCorrectForBucket("ANC").forEach(n => lines.push("    - " + n));
+  lines.push("  Activo corriente:");
+  sortCorrectForBucket("AC").forEach(n => lines.push("    - " + n));
+
+  lines.push("");
+  lines.push("PATRIMONIO NETO");
+  sortCorrectForBucket("PN").forEach(n => lines.push("  - " + n));
+
+  lines.push("");
+  lines.push("PASIVO (menor → mayor exigibilidad)");
+  lines.push("  Pasivo no corriente:");
+  sortCorrectForBucket("PNC").forEach(n => lines.push("    - " + n));
+  lines.push("  Pasivo corriente:");
+  sortCorrectForBucket("PC").forEach(n => lines.push("    - " + n));
+
+  return lines.join("\n");
+}
+
+function finish(){
+  const g = grade();
+
+  $("zonaResultados").style.display = "";
+  $("resumen").innerHTML = `
+    <div class="kpi">
+      <span class="pill">Aciertos: ${g.correct}/${g.total}</span>
+      <span class="pill">Errores: ${g.errores}/${g.total}</span>
+      <span class="pill">Acierto: ${g.pct.toFixed(1)}%</span>
+      <span class="pill">Nota: ${g.nota.toFixed(2)} / 10</span>
+    </div>
+    <div class="muted" style="margin-top:8px;">
+      Se considera <b>acierto</b> cuando el elemento está en la <b>masa correcta</b> y en la <b>posición correcta</b> dentro del bloque según liquidez/exigibilidad.
+    </div>
+  `;
+
+  const mistakesText = g.mistakes.length
+    ? g.mistakes.map(x => "- " + x).join("\n")
+    : "✅ Sin errores. Perfecto.";
+
+  $("erroresTxt").textContent = mistakesText;
+  $("correctoTxt").textContent = buildCorrectBalanceText();
+
+  // scroll hacia resultados
+  $("zonaResultados").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+/* ================== eventos ================== */
+
+$("btnStart").addEventListener("click", initAttempt);
+$("btnPlace").addEventListener("click", placeCurrent);
+$("btnFinish").addEventListener("click", finish);
+</script>
+
+</body>
+</html>

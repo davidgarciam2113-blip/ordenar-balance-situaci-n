@@ -1,499 +1,614 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Puzle de la célula</title>
+  <title>Clasificación de masas patrimoniales</title>
   <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --ok: #15803d;
+      --bad: #b91c1c;
+      --border: #dbe4f0;
+      --shadow: 0 10px 30px rgba(31, 41, 55, 0.08);
+    }
+
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      background: #f8fafc;
-      color: #0f172a;
+      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 100%);
+      color: var(--text);
     }
-    .app {
-      max-width: 1280px;
+
+    .container {
+      max-width: 1300px;
       margin: 0 auto;
-      padding: 20px;
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 20px;
-    }
-    .panel {
-      background: #ffffff;
-      border-radius: 24px;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-      overflow: hidden;
-    }
-    .sidebar {
       padding: 24px;
     }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+
+    h1, h2, h3 {
+      margin-top: 0;
+    }
+
     h1 {
-      margin: 0 0 10px 0;
-      font-size: 30px;
-      line-height: 1.1;
+      font-size: 2rem;
+      margin-bottom: 8px;
     }
-    p {
-      font-size: 14px;
+
+    .subtitle {
+      color: var(--muted);
+      margin-bottom: 0;
       line-height: 1.5;
-      color: #475569;
     }
-    .progress-box {
-      margin-top: 16px;
-      background: #f1f5f9;
-      border-radius: 20px;
-      padding: 16px;
-    }
-    .progress-bar {
-      height: 12px;
-      background: white;
-      border-radius: 999px;
-      overflow: hidden;
-      margin-top: 8px;
-    }
-    .progress-fill {
-      height: 100%;
-      width: 0%;
-      background: #0f172a;
-      transition: width 0.25s ease;
-    }
-    .controls {
+
+    .grid {
       display: grid;
-      gap: 10px;
-      margin-top: 16px;
+      gap: 16px;
     }
-    button {
+
+    .grid-2 {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .grid-5 {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    input, select, button {
+      font: inherit;
+    }
+
+    input, select {
       width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid #cfd8e3;
+      background: #fff;
+    }
+
+    button {
       border: none;
-      border-radius: 16px;
+      border-radius: 12px;
       padding: 12px 16px;
       font-weight: 700;
       cursor: pointer;
-      font-size: 14px;
+      transition: 0.2s ease;
     }
-    .primary {
-      background: #0f172a;
+
+    .btn-primary {
+      background: var(--primary);
       color: white;
     }
-    .secondary {
-      background: white;
-      color: #0f172a;
-      border: 1px solid #cbd5e1;
+
+    .btn-primary:hover { background: var(--primary-dark); }
+
+    .btn-secondary {
+      background: #e8eefc;
+      color: #173a8a;
     }
-    .feedback, .success {
-      margin-top: 16px;
-      border-radius: 18px;
-      padding: 16px;
-      font-size: 14px;
-      line-height: 1.4;
+
+    .btn-danger {
+      background: #fee2e2;
+      color: #991b1b;
     }
-    .feedback {
-      background: white;
-      border: 1px solid #e2e8f0;
-      color: #334155;
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: end;
     }
-    .success {
-      display: none;
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      color: #166534;
-    }
-    .pieces {
-      margin-top: 20px;
-    }
-    .pieces-title {
-      font-size: 14px;
+
+    .pill {
+      display: inline-block;
+      background: #eaf2ff;
+      color: #1947a3;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.95rem;
       font-weight: 700;
+      margin-right: 8px;
+      margin-top: 8px;
+    }
+
+    .bank {
+      min-height: 120px;
+      border: 2px dashed #b7c7df;
+      border-radius: 16px;
+      padding: 14px;
+      background: #fbfdff;
+    }
+
+    .dropzone {
+      min-height: 240px;
+      border: 2px dashed #c9d5e8;
+      border-radius: 16px;
+      padding: 14px;
+      background: #fcfdff;
+    }
+
+    .dropzone h3 {
+      font-size: 1.05rem;
       margin-bottom: 10px;
     }
-    .piece-list {
-      display: grid;
-      gap: 10px;
-    }
-    .piece {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+
+    .item {
       background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 18px;
-      padding: 12px;
-      cursor: grab;
-    }
-    .piece.dragging {
-      opacity: 0.5;
-    }
-    .piece-icon {
-      width: 48px;
-      height: 48px;
+      border: 1px solid #d6dfeb;
       border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #f8fafc;
-      flex-shrink: 0;
-      overflow: hidden;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      cursor: grab;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.04);
+      user-select: none;
     }
-    .piece-name {
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 2px;
+
+    .item:active { cursor: grabbing; }
+
+    .correct {
+      border-color: #86efac;
+      background: #f0fdf4;
     }
-    .piece-description {
-      font-size: 12px;
-      color: #64748b;
-      line-height: 1.4;
+
+    .incorrect {
+      border-color: #fca5a5;
+      background: #fef2f2;
     }
-    .board-wrap {
-      padding: 20px;
+
+    .muted {
+      color: var(--muted);
     }
-    .board {
-      position: relative;
+
+    .result {
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    table {
       width: 100%;
-      aspect-ratio: 1 / 1;
-      max-width: 780px;
-      margin: 0 auto;
+      border-collapse: collapse;
+      margin-top: 14px;
+      background: white;
+      border-radius: 14px;
       overflow: hidden;
-      border-radius: 32px;
-      border: 1px solid #e2e8f0;
-      background: radial-gradient(circle at center, #fef3c7 0%, #fde68a 42%, #f8fafc 100%);
     }
-    .cell-base {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 78%;
-      height: 78%;
-      transform: translate(-50%, -50%);
-      border-radius: 50%;
-      border: 8px solid rgba(16,185,129,0.7);
-      background: rgba(254,243,199,0.78);
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      font-size: 0.96rem;
     }
-    .hint, .placed {
-      position: absolute;
-      transform: translate(-50%, -50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      pointer-events: none;
+
+    th {
+      background: #eff6ff;
+      color: #1e3a8a;
     }
-    .hint-label, .placed-label {
-      background: rgba(255,255,255,0.9);
-      padding: 4px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
-      text-align: center;
+
+    .hidden { display: none; }
+
+    .footer-note {
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin-top: 10px;
     }
-    .hint { opacity: 0.7; }
-    @media (max-width: 980px) {
-      .app { grid-template-columns: 1fr; }
+
+    @media (max-width: 700px) {
+      .container { padding: 14px; }
+      h1 { font-size: 1.55rem; }
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <div class="panel">
-      <div class="sidebar">
-        <h1>Puzle interactivo: la célula</h1>
-        <p>Arrastra cada orgánulo hasta su posición correcta. La actividad incluye autocorrección inmediata y ayuda visual opcional.</p>
+  <div class="container">
+    <section class="card">
+      <h1>Masas patrimoniales: juego de clasificación</h1>
+      <p class="subtitle">
+        Arrastra cada elemento patrimonial a su masa correspondiente. La aplicación guarda el mejor intento de cada alumna o alumno en este navegador.
+      </p>
+    </section>
 
-        <div class="progress-box">
-          <div style="font-size:14px;font-weight:700;">Progreso</div>
-          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-          <div id="progressText" style="margin-top:8px;font-size:14px;color:#334155;">0 de 6 piezas correctas</div>
+    <section class="card">
+      <div class="grid grid-2">
+        <div>
+          <label for="studentName">Nombre del alumno o alumna</label>
+          <input id="studentName" type="text" placeholder="Escribe aquí el nombre" maxlength="60" />
         </div>
-
-        <div class="controls">
-          <button class="primary" id="toggleHelpBtn">Mostrar ayuda</button>
-          <button class="secondary" id="resetBtn">Reiniciar</button>
-        </div>
-
-        <div class="feedback" id="feedbackBox">Arrastra cada orgánulo al lugar correcto dentro de la célula.</div>
-        <div class="success" id="successBox"><strong>¡Célula completada correctamente!</strong><div style="margin-top:8px;">Ahora se puede repasar la función de cada orgánulo.</div></div>
-
-        <div class="pieces">
-          <div class="pieces-title">Piezas</div>
-          <div class="piece-list" id="pieceList"></div>
+        <div>
+          <label for="levelSelect">Nivel</label>
+          <select id="levelSelect">
+            <option value="1">Nivel 1 · básico</option>
+            <option value="2">Nivel 2 · intermedio</option>
+            <option value="3">Nivel 3 · avanzado</option>
+          </select>
         </div>
       </div>
-    </div>
 
-    <div class="panel">
-      <div class="board-wrap">
-        <div class="board" id="board">
-          <div class="cell-base"></div>
-          <div id="hintLayer"></div>
-          <div id="placedLayer"></div>
-        </div>
+      <div class="toolbar" style="margin-top:16px;">
+        <button class="btn-primary" id="startBtn">Empezar actividad</button>
+        <button class="btn-secondary" id="checkBtn" disabled>Corregir</button>
+        <button class="btn-secondary" id="resetBtn" disabled>Reiniciar nivel</button>
+        <button class="btn-secondary" id="showRecordsBtn">Ver mejores notas</button>
+        <button class="btn-danger" id="clearRecordsBtn">Borrar registros</button>
       </div>
-    </div>
+
+      <div style="margin-top: 10px;">
+        <span class="pill" id="levelInfo">Selecciona un nivel</span>
+        <span class="pill" id="studentInfo">Sin alumno registrado</span>
+      </div>
+    </section>
+
+    <section class="card hidden" id="gameSection">
+      <h2>Elementos patrimoniales por clasificar</h2>
+      <p class="muted">Primero aparecen todos los elementos mezclados. Después deben arrastrarse a la masa patrimonial adecuada.</p>
+      <div class="bank" id="bank" ondragover="allowDrop(event)" ondrop="dropItem(event, 'bank')"></div>
+    </section>
+
+    <section class="grid grid-5 hidden" id="zonesSection">
+      <div class="card dropzone" id="activo_corriente" ondragover="allowDrop(event)" ondrop="dropItem(event, 'activo_corriente')">
+        <h3>Activo corriente</h3>
+      </div>
+      <div class="card dropzone" id="activo_no_corriente" ondragover="allowDrop(event)" ondrop="dropItem(event, 'activo_no_corriente')">
+        <h3>Activo no corriente</h3>
+      </div>
+      <div class="card dropzone" id="fondos_propios" ondragover="allowDrop(event)" ondrop="dropItem(event, 'fondos_propios')">
+        <h3>Fondos propios</h3>
+      </div>
+      <div class="card dropzone" id="pasivo_corriente" ondragover="allowDrop(event)" ondrop="dropItem(event, 'pasivo_corriente')">
+        <h3>Pasivo corriente</h3>
+      </div>
+      <div class="card dropzone" id="pasivo_no_corriente" ondragover="allowDrop(event)" ondrop="dropItem(event, 'pasivo_no_corriente')">
+        <h3>Pasivo no corriente</h3>
+      </div>
+    </section>
+
+    <section class="card hidden" id="resultSection">
+      <h2>Resultado</h2>
+      <div class="result" id="resultText"></div>
+    </section>
+
+    <section class="card" id="recordsSection">
+      <h2>Mejores notas guardadas</h2>
+      <div id="recordsTableWrap"></div>
+      <p class="footer-note">
+        Estos datos se guardan solo en el navegador y en el dispositivo en el que se usa la actividad. Si más adelante se quiere un registro común para toda la clase, habrá que conectarlo a una base de datos o a un formulario externo.
+      </p>
+    </section>
   </div>
 
   <script>
-    const organelles = [
-      {
-        id: "nucleo",
-        name: "Núcleo",
-        color: "#c084fc",
-        shape: "circle",
-        home: { x: 42, y: 38 },
-        size: 84,
-        description: "Contiene el ADN y dirige la actividad celular."
-      },
-      {
-        id: "mitocondria",
-        name: "Mitocondria",
-        color: "#fb923c",
-        shape: "bean",
-        home: { x: 68, y: 58 },
-        size: 76,
-        description: "Produce energía para la célula."
-      },
-      {
-        id: "golgi",
-        name: "Aparato de Golgi",
-        color: "#38bdf8",
-        shape: "stack",
-        home: { x: 70, y: 28 },
-        size: 76,
-        description: "Modifica, empaqueta y transporta sustancias."
-      },
-      {
-        id: "rer",
-        name: "Retículo endoplasmático rugoso",
-        color: "#4ade80",
-        shape: "wavy",
-        home: { x: 24, y: 56 },
-        size: 86,
-        description: "Participa en la síntesis y transporte de proteínas."
-      },
-      {
-        id: "lisosoma",
-        name: "Lisosoma",
-        color: "#f472b6",
-        shape: "dot",
-        home: { x: 28, y: 26 },
-        size: 46,
-        description: "Descompone desechos celulares."
-      },
-      {
-        id: "membrana",
-        name: "Membrana celular",
-        color: "#22c55e",
-        shape: "ring",
-        home: { x: 50, y: 50 },
-        size: 250,
-        description: "Rodea y protege la célula. Regula lo que entra y sale."
-      }
-    ];
-
-    const slotTolerance = 8;
-    const state = {
-      placed: {},
-      showHelp: false
+    const DATA = {
+      1: [
+        { name: 'Caja', category: 'activo_corriente' },
+        { name: 'Bancos c/c', category: 'activo_corriente' },
+        { name: 'Mercaderías', category: 'activo_corriente' },
+        { name: 'Clientes', category: 'activo_corriente' },
+        { name: 'Maquinaria', category: 'activo_no_corriente' },
+        { name: 'Mobiliario', category: 'activo_no_corriente' },
+        { name: 'Capital social', category: 'fondos_propios' },
+        { name: 'Reservas', category: 'fondos_propios' },
+        { name: 'Proveedores', category: 'pasivo_corriente' },
+        { name: 'Hacienda Pública acreedora', category: 'pasivo_corriente' },
+        { name: 'Deudas a largo plazo con entidades de crédito', category: 'pasivo_no_corriente' },
+        { name: 'Préstamos a largo plazo', category: 'pasivo_no_corriente' }
+      ],
+      2: [
+        { name: 'Caja', category: 'activo_corriente' },
+        { name: 'Bancos c/c', category: 'activo_corriente' },
+        { name: 'Mercaderías', category: 'activo_corriente' },
+        { name: 'Clientes', category: 'activo_corriente' },
+        { name: 'Deudores', category: 'activo_corriente' },
+        { name: 'Inversiones financieras a corto plazo', category: 'activo_corriente' },
+        { name: 'Equipos para procesos de información', category: 'activo_no_corriente' },
+        { name: 'Construcciones', category: 'activo_no_corriente' },
+        { name: 'Elementos de transporte', category: 'activo_no_corriente' },
+        { name: 'Aplicaciones informáticas', category: 'activo_no_corriente' },
+        { name: 'Capital social', category: 'fondos_propios' },
+        { name: 'Reservas voluntarias', category: 'fondos_propios' },
+        { name: 'Resultado del ejercicio', category: 'fondos_propios' },
+        { name: 'Proveedores', category: 'pasivo_corriente' },
+        { name: 'Acreedores por prestación de servicios', category: 'pasivo_corriente' },
+        { name: 'Organismos de la Seguridad Social acreedores', category: 'pasivo_corriente' },
+        { name: 'Deudas a corto plazo con entidades de crédito', category: 'pasivo_corriente' },
+        { name: 'Deudas a largo plazo con entidades de crédito', category: 'pasivo_no_corriente' },
+        { name: 'Obligaciones y bonos a largo plazo', category: 'pasivo_no_corriente' },
+        { name: 'Proveedores de inmovilizado a largo plazo', category: 'pasivo_no_corriente' }
+      ],
+      3: [
+        { name: 'Caja', category: 'activo_corriente' },
+        { name: 'Bancos c/c', category: 'activo_corriente' },
+        { name: 'Mercaderías', category: 'activo_corriente' },
+        { name: 'Clientes', category: 'activo_corriente' },
+        { name: 'Clientes, efectos comerciales a cobrar', category: 'activo_corriente' },
+        { name: 'Deudores varios', category: 'activo_corriente' },
+        { name: 'Hacienda Pública deudora', category: 'activo_corriente' },
+        { name: 'Inversiones financieras temporales', category: 'activo_corriente' },
+        { name: 'Terrenos y bienes naturales', category: 'activo_no_corriente' },
+        { name: 'Construcciones', category: 'activo_no_corriente' },
+        { name: 'Maquinaria', category: 'activo_no_corriente' },
+        { name: 'Mobiliario', category: 'activo_no_corriente' },
+        { name: 'Equipos para procesos de información', category: 'activo_no_corriente' },
+        { name: 'Aplicaciones informáticas', category: 'activo_no_corriente' },
+        { name: 'Propiedad industrial', category: 'activo_no_corriente' },
+        { name: 'Inversiones financieras a largo plazo', category: 'activo_no_corriente' },
+        { name: 'Capital social', category: 'fondos_propios' },
+        { name: 'Prima de emisión', category: 'fondos_propios' },
+        { name: 'Reservas', category: 'fondos_propios' },
+        { name: 'Resultado del ejercicio', category: 'fondos_propios' },
+        { name: 'Subvenciones, donaciones y legados', category: 'fondos_propios' },
+        { name: 'Proveedores', category: 'pasivo_corriente' },
+        { name: 'Proveedores, efectos comerciales a pagar', category: 'pasivo_corriente' },
+        { name: 'Acreedores por prestación de servicios', category: 'pasivo_corriente' },
+        { name: 'Remuneraciones pendientes de pago', category: 'pasivo_corriente' },
+        { name: 'Hacienda Pública acreedora', category: 'pasivo_corriente' },
+        { name: 'Organismos de la Seguridad Social acreedores', category: 'pasivo_corriente' },
+        { name: 'Deudas a corto plazo con entidades de crédito', category: 'pasivo_corriente' },
+        { name: 'Deudas a largo plazo con entidades de crédito', category: 'pasivo_no_corriente' },
+        { name: 'Empréstito a largo plazo', category: 'pasivo_no_corriente' },
+        { name: 'Proveedores de inmovilizado a largo plazo', category: 'pasivo_no_corriente' },
+        { name: 'Fianzas recibidas a largo plazo', category: 'pasivo_no_corriente' }
+      ]
     };
 
-    const pieceList = document.getElementById('pieceList');
-    const placedLayer = document.getElementById('placedLayer');
-    const hintLayer = document.getElementById('hintLayer');
-    const board = document.getElementById('board');
-    const feedbackBox = document.getElementById('feedbackBox');
-    const successBox = document.getElementById('successBox');
-    const progressFill = document.getElementById('progressFill');
-    const progressText = document.getElementById('progressText');
-    const toggleHelpBtn = document.getElementById('toggleHelpBtn');
-    const resetBtn = document.getElementById('resetBtn');
+    const CATEGORY_NAMES = {
+      activo_corriente: 'Activo corriente',
+      activo_no_corriente: 'Activo no corriente',
+      fondos_propios: 'Fondos propios',
+      pasivo_corriente: 'Pasivo corriente',
+      pasivo_no_corriente: 'Pasivo no corriente'
+    };
 
-    function distance(a, b) {
-      return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+    const studentNameInput = document.getElementById('studentName');
+    const levelSelect = document.getElementById('levelSelect');
+    const startBtn = document.getElementById('startBtn');
+    const checkBtn = document.getElementById('checkBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const showRecordsBtn = document.getElementById('showRecordsBtn');
+    const clearRecordsBtn = document.getElementById('clearRecordsBtn');
+    const levelInfo = document.getElementById('levelInfo');
+    const studentInfo = document.getElementById('studentInfo');
+    const bank = document.getElementById('bank');
+    const resultSection = document.getElementById('resultSection');
+    const resultText = document.getElementById('resultText');
+    const gameSection = document.getElementById('gameSection');
+    const zonesSection = document.getElementById('zonesSection');
+    const recordsTableWrap = document.getElementById('recordsTableWrap');
+
+    let currentItems = [];
+    let currentLevel = 1;
+    let currentStudent = '';
+    let attemptNumber = 0;
+
+    function shuffle(array) {
+      const copy = [...array];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
     }
 
-    function createShape(shape, color, size, outline = false) {
-      if (shape === 'wavy') {
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('width', size);
-        svg.setAttribute('height', size * 0.72);
-        svg.setAttribute('viewBox', '0 0 100 70');
+    function normalizeName(name) {
+      return name.trim().replace(/\s+/g, ' ');
+    }
 
-        ['M8 18 C22 2, 36 34, 50 18 S78 2, 92 18', 'M8 36 C22 20, 36 52, 50 36 S78 20, 92 36', 'M8 54 C22 38, 36 70, 50 54 S78 38, 92 54'].forEach(d => {
-          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          path.setAttribute('d', d);
-          path.setAttribute('fill', 'none');
-          path.setAttribute('stroke', color);
-          path.setAttribute('stroke-width', '8');
-          path.setAttribute('stroke-linecap', 'round');
-          if (outline) path.setAttribute('stroke-dasharray', '8 8');
-          svg.appendChild(path);
-        });
-        svg.style.opacity = outline ? '0.6' : '1';
-        return svg;
-      }
+    function allowDrop(event) {
+      event.preventDefault();
+    }
 
+    function dragItem(event) {
+      event.dataTransfer.setData('text/plain', event.target.id);
+    }
+
+    function dropItem(event, zoneId) {
+      event.preventDefault();
+      const itemId = event.dataTransfer.getData('text/plain');
+      const item = document.getElementById(itemId);
+      if (!item) return;
+      document.getElementById(zoneId).appendChild(item);
+    }
+
+    window.allowDrop = allowDrop;
+    window.dropItem = dropItem;
+    window.dragItem = dragItem;
+
+    function makeItemElement(item, index) {
       const div = document.createElement('div');
-      div.style.boxSizing = 'border-box';
-      div.style.opacity = outline ? '0.6' : '1';
-
-      if (shape === 'circle' || shape === 'dot') {
-        div.style.width = size + 'px';
-        div.style.height = size + 'px';
-        div.style.borderRadius = '50%';
-        div.style.background = outline ? 'transparent' : color;
-        div.style.border = `3px dashed ${color}`;
-      } else if (shape === 'bean') {
-        div.style.width = size + 'px';
-        div.style.height = (size * 0.62) + 'px';
-        div.style.borderRadius = '45% 55% 50% 50% / 55% 45% 55% 45%';
-        div.style.background = outline ? 'transparent' : color;
-        div.style.border = `3px dashed ${color}`;
-        div.style.transform = 'rotate(-12deg)';
-      } else if (shape === 'stack') {
-        div.style.position = 'relative';
-        div.style.width = size + 'px';
-        div.style.height = size + 'px';
-        for (let i = 0; i < 4; i++) {
-          const line = document.createElement('div');
-          line.style.position = 'absolute';
-          line.style.left = (size * 0.14) + 'px';
-          line.style.top = (10 + i * 14) + 'px';
-          line.style.width = (size * 0.72) + 'px';
-          line.style.height = '12px';
-          line.style.borderRadius = '999px';
-          line.style.background = outline ? 'transparent' : color;
-          line.style.border = `3px dashed ${color}`;
-          line.style.boxSizing = 'border-box';
-          div.appendChild(line);
-        }
-      } else if (shape === 'ring') {
-        div.style.width = size + 'px';
-        div.style.height = size + 'px';
-        div.style.borderRadius = '50%';
-        div.style.background = 'transparent';
-        div.style.border = `10px ${outline ? 'dashed' : 'solid'} ${color}`;
-      }
+      div.className = 'item';
+      div.id = `item_${index}_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+      div.draggable = true;
+      div.ondragstart = dragItem;
+      div.dataset.correctCategory = item.category;
+      div.textContent = item.name;
       return div;
     }
 
-    function renderPieces() {
-      pieceList.innerHTML = '';
-      organelles.filter(o => !state.placed[o.id]).forEach(o => {
-        const piece = document.createElement('div');
-        piece.className = 'piece';
-        piece.draggable = true;
-        piece.dataset.id = o.id;
-
-        piece.addEventListener('dragstart', (e) => {
-          e.dataTransfer.setData('text/plain', o.id);
-          piece.classList.add('dragging');
-        });
-        piece.addEventListener('dragend', () => piece.classList.remove('dragging'));
-
-        const icon = document.createElement('div');
-        icon.className = 'piece-icon';
-        icon.appendChild(createShape(o.shape, o.color, 32, false));
-
-        const text = document.createElement('div');
-        text.innerHTML = `<div class="piece-name">${o.name}</div><div class="piece-description">${o.description}</div>`;
-
-        piece.appendChild(icon);
-        piece.appendChild(text);
-        pieceList.appendChild(piece);
+    function clearZones() {
+      const zoneIds = ['bank', 'activo_corriente', 'activo_no_corriente', 'fondos_propios', 'pasivo_corriente', 'pasivo_no_corriente'];
+      zoneIds.forEach(id => {
+        const zone = document.getElementById(id);
+        if (id === 'bank') {
+          zone.innerHTML = '';
+        } else {
+          const title = zone.querySelector('h3');
+          zone.innerHTML = '';
+          zone.appendChild(title);
+        }
       });
     }
 
-    function renderHints() {
-      hintLayer.innerHTML = '';
-      if (!state.showHelp) return;
-
-      organelles.filter(o => !state.placed[o.id]).forEach(o => {
-        const wrap = document.createElement('div');
-        wrap.className = 'hint';
-        wrap.style.left = o.home.x + '%';
-        wrap.style.top = o.home.y + '%';
-
-        const shape = createShape(o.shape, o.color, o.size, true);
-        const label = document.createElement('div');
-        label.className = 'hint-label';
-        label.textContent = o.name;
-
-        wrap.appendChild(shape);
-        wrap.appendChild(label);
-        hintLayer.appendChild(wrap);
-      });
-    }
-
-    function renderPlaced() {
-      placedLayer.innerHTML = '';
-      organelles.filter(o => state.placed[o.id]).forEach(o => {
-        const wrap = document.createElement('div');
-        wrap.className = 'placed';
-        wrap.style.left = o.home.x + '%';
-        wrap.style.top = o.home.y + '%';
-
-        const shape = createShape(o.shape, o.color, o.size, false);
-        const label = document.createElement('div');
-        label.className = 'placed-label';
-        label.textContent = o.name;
-
-        wrap.appendChild(shape);
-        wrap.appendChild(label);
-        placedLayer.appendChild(wrap);
-      });
-    }
-
-    function renderProgress() {
-      const total = Object.keys(state.placed).length;
-      progressFill.style.width = ((total / organelles.length) * 100) + '%';
-      progressText.textContent = `${total} de ${organelles.length} piezas correctas`;
-      successBox.style.display = total === organelles.length ? 'block' : 'none';
-    }
-
-    function renderAll() {
-      renderPieces();
-      renderHints();
-      renderPlaced();
-      renderProgress();
-    }
-
-    board.addEventListener('dragover', (e) => e.preventDefault());
-    board.addEventListener('drop', (e) => {
-      e.preventDefault();
-      const id = e.dataTransfer.getData('text/plain');
-      if (!id) return;
-
-      const organelle = organelles.find(o => o.id === id);
-      const rect = board.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      const correct = distance({ x, y }, organelle.home) <= slotTolerance;
-
-      if (correct) {
-        state.placed[id] = true;
-        feedbackBox.textContent = `✅ ${organelle.name} colocado correctamente.`;
-      } else {
-        feedbackBox.textContent = `❌ ${organelle.name} no está en su lugar. Inténtalo de nuevo.`;
+    function startGame() {
+      const name = normalizeName(studentNameInput.value);
+      if (!name) {
+        alert('Debes escribir el nombre del alumno o alumna antes de empezar.');
+        studentNameInput.focus();
+        return;
       }
 
-      renderAll();
-    });
+      currentStudent = name;
+      currentLevel = Number(levelSelect.value);
+      currentItems = shuffle(DATA[currentLevel]);
+      attemptNumber += 1;
 
-    toggleHelpBtn.addEventListener('click', () => {
-      state.showHelp = !state.showHelp;
-      toggleHelpBtn.textContent = state.showHelp ? 'Ocultar ayuda' : 'Mostrar ayuda';
-      renderHints();
-    });
+      clearZones();
+      resultSection.classList.add('hidden');
+      gameSection.classList.remove('hidden');
+      zonesSection.classList.remove('hidden');
 
-    resetBtn.addEventListener('click', () => {
-      state.placed = {};
-      state.showHelp = false;
-      toggleHelpBtn.textContent = 'Mostrar ayuda';
-      feedbackBox.textContent = 'Arrastra cada orgánulo al lugar correcto dentro de la célula.';
-      renderAll();
-    });
+      currentItems.forEach((item, index) => {
+        bank.appendChild(makeItemElement(item, index));
+      });
 
-    renderAll();
+      levelInfo.textContent = `Nivel ${currentLevel} · ${DATA[currentLevel].length} elementos`;
+      studentInfo.textContent = `Alumno/a: ${currentStudent}`;
+      checkBtn.disabled = false;
+      resetBtn.disabled = false;
+    }
+
+    function gradeGame() {
+      const zones = ['activo_corriente', 'activo_no_corriente', 'fondos_propios', 'pasivo_corriente', 'pasivo_no_corriente'];
+      let total = currentItems.length;
+      let correct = 0;
+      let details = [];
+
+      document.querySelectorAll('.item').forEach(item => {
+        item.classList.remove('correct', 'incorrect');
+        const parentId = item.parentElement.id;
+        const expected = item.dataset.correctCategory;
+        if (parentId === expected) {
+          item.classList.add('correct');
+          correct += 1;
+        } else {
+          item.classList.add('incorrect');
+          details.push(`“${item.textContent}” debía ir en ${CATEGORY_NAMES[expected]}.`);
+        }
+      });
+
+      const score10 = ((correct / total) * 10).toFixed(2);
+      const percent = ((correct / total) * 100).toFixed(1);
+      saveRecord(currentStudent, currentLevel, Number(score10), correct, total);
+
+      resultText.innerHTML = `
+        <p><strong>${currentStudent}</strong>, el resultado del nivel ${currentLevel} es:</p>
+        <p><strong>${correct}</strong> aciertos de <strong>${total}</strong> elementos.</p>
+        <p>Porcentaje de acierto: <strong>${percent}%</strong>.</p>
+        <p>Calificación sobre 10: <strong>${score10}</strong>.</p>
+        ${details.length ? `<p><strong>Elementos incorrectos:</strong></p><ul>${details.map(d => `<li>${d}</li>`).join('')}</ul>` : '<p><strong>¡Enhorabuena! Todo está correctamente clasificado.</strong></p>'}
+      `;
+
+      resultSection.classList.remove('hidden');
+      renderRecords();
+    }
+
+    function resetLevel() {
+      if (!currentStudent) return;
+      startGame();
+    }
+
+    function getRecords() {
+      try {
+        return JSON.parse(localStorage.getItem('balanceRecords') || '[]');
+      } catch {
+        return [];
+      }
+    }
+
+    function saveRecords(records) {
+      localStorage.setItem('balanceRecords', JSON.stringify(records));
+    }
+
+    function saveRecord(student, level, score, correct, total) {
+      const records = getRecords();
+      const date = new Date().toLocaleString('es-ES');
+      const existing = records.find(r => r.student.toLowerCase() === student.toLowerCase() && r.level === level);
+
+      if (!existing) {
+        records.push({ student, level, score, correct, total, date });
+      } else if (score > existing.score) {
+        existing.score = score;
+        existing.correct = correct;
+        existing.total = total;
+        existing.date = date;
+      }
+
+      records.sort((a, b) => {
+        if (a.student.toLowerCase() < b.student.toLowerCase()) return -1;
+        if (a.student.toLowerCase() > b.student.toLowerCase()) return 1;
+        return a.level - b.level;
+      });
+
+      saveRecords(records);
+    }
+
+    function renderRecords() {
+      const records = getRecords();
+      if (!records.length) {
+        recordsTableWrap.innerHTML = '<p class="muted">Todavía no hay registros guardados.</p>';
+        return;
+      }
+
+      recordsTableWrap.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Alumno/a</th>
+              <th>Nivel</th>
+              <th>Mejor nota</th>
+              <th>Aciertos</th>
+              <th>Última mejora guardada</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${records.map(r => `
+              <tr>
+                <td>${r.student}</td>
+                <td>${r.level}</td>
+                <td>${r.score.toFixed(2)}</td>
+                <td>${r.correct}/${r.total}</td>
+                <td>${r.date}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function clearRecords() {
+      const ok = confirm('¿Seguro que deseas borrar todos los registros guardados en este navegador?');
+      if (!ok) return;
+      localStorage.removeItem('balanceRecords');
+      renderRecords();
+    }
+
+    startBtn.addEventListener('click', startGame);
+    checkBtn.addEventListener('click', gradeGame);
+    resetBtn.addEventListener('click', resetLevel);
+    showRecordsBtn.addEventListener('click', renderRecords);
+    clearRecordsBtn.addEventListener('click', clearRecords);
+
+    renderRecords();
   </script>
 </body>
 </html>

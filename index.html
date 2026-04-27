@@ -1,727 +1,564 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clasificación de masas patrimoniales</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Balance: ordenar y clasificar</title>
   <style>
-    :root {
-      --bg: #f6f8fb;
-      --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --primary: #2563eb;
-      --primary-dark: #1d4ed8;
-      --ok: #15803d;
-      --bad: #b91c1c;
-      --border: #dbe4f0;
-      --shadow: 0 10px 30px rgba(31, 41, 55, 0.08);
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 100%);
-      color: var(--text);
-    }
-
-    .container {
-      max-width: 1300px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      padding: 22px;
-      margin-bottom: 20px;
-    }
-
-    h1, h2, h3 {
-      margin-top: 0;
-    }
-
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 8px;
-    }
-
-    .subtitle {
-      color: var(--muted);
-      margin-bottom: 0;
-      line-height: 1.5;
-    }
-
-    .grid {
-      display: grid;
-      gap: 16px;
-    }
-
-    .grid-2 {
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    }
-
-    .grid-5 {
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    }
-
-    label {
-      display: block;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 0; background: #f6f7fb; color: #111; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+    .card { background: white; border-radius: 14px; padding: 16px; box-shadow: 0 6px 20px rgba(0,0,0,.06); margin: 12px 0; }
+    h1 { font-size: 20px; margin: 0 0 6px; }
+    h2 { font-size: 16px; margin: 0 0 8px; }
+    h3 { font-size: 14px; margin: 0 0 8px; }
+    .muted { color: #555; font-size: 13px; }
+    label { font-weight: 700; font-size: 13px; display:block; margin-bottom: 6px; }
 
     input, select, button {
-      font: inherit;
+      font-size: 16px; padding: 10px 12px; border-radius: 10px;
+      border: 1px solid #d8dbe6; width: 100%; box-sizing: border-box;
     }
+    button { border: 0; background: #2563eb; color: white; font-weight: 800; cursor: pointer; }
+    button.secondary { background: #111827; }
+    button.ghost { background: transparent; color: #111; border: 1px solid #d8dbe6; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
 
-    input, select {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 12px;
-      border: 1px solid #cfd8e3;
-      background: #fff;
-    }
+    .row { display:grid; grid-template-columns: 1fr; gap: 10px; }
+    @media (min-width: 900px){ .row { grid-template-columns: 1.2fr 1fr 1fr; } }
 
-    button {
-      border: none;
-      border-radius: 12px;
-      padding: 12px 16px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: 0.2s ease;
-    }
+    .grid { display:grid; gap: 12px; }
+    @media (min-width: 900px){ .grid { grid-template-columns: 1fr 1fr; } }
 
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
+    .pill { display:inline-block; padding: 4px 10px; border-radius: 999px; background:#eef2ff; color:#1e40af; font-weight:800; font-size: 12px; }
 
-    .btn-primary:hover { background: var(--primary-dark); }
+    .box { border: 1px solid #eef0f7; border-radius: 12px; padding: 12px; background: #fafbff; }
+    .cols3 { display:grid; gap: 12px; }
+    @media (min-width: 900px){ .cols3 { grid-template-columns: 1fr 1fr 1fr; } }
 
-    .btn-secondary {
-      background: #e8eefc;
-      color: #173a8a;
-    }
-
-    .btn-danger {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: end;
-    }
-
-    .pill {
-      display: inline-block;
-      background: #eaf2ff;
-      color: #1947a3;
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      margin-right: 8px;
-      margin-top: 8px;
-    }
-
-    .bank {
-      min-height: 120px;
-      border: 2px dashed #b7c7df;
-      border-radius: 16px;
-      padding: 14px;
-      background: #fbfdff;
-    }
-
-    .dropzone {
-      min-height: 240px;
-      border: 2px dashed #c9d5e8;
-      border-radius: 16px;
-      padding: 14px;
-      background: #fcfdff;
-    }
-
-    .dropzone h3 {
-      font-size: 1.05rem;
-      margin-bottom: 10px;
-    }
-
+    .itemlist { list-style: none; padding: 0; margin: 0; display:grid; gap: 8px; }
     .item {
-      background: white;
-      border: 1px solid #d6dfeb;
-      border-radius: 12px;
-      padding: 10px 12px;
-      margin-bottom: 10px;
-      cursor: grab;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.04);
-      user-select: none;
+      display:flex; align-items:center; justify-content:space-between; gap: 10px;
+      border: 1px solid #e7e9f3; background: white; border-radius: 12px; padding: 10px;
     }
+    .item strong { font-size: 14px; }
+    .actions { display:flex; gap: 8px; }
+    .mini { width:auto; padding: 8px 10px; border-radius: 10px; font-weight: 800; }
+    .mini.up { background:#0f172a; }
+    .mini.down { background:#0f172a; }
+    .mini.del { background:#dc2626; }
 
-    .item:active { cursor: grabbing; }
-
-    .correct {
-      border-color: #86efac;
-      background: #f0fdf4;
+    .result { white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: #0b1220; color: #e5e7eb; padding: 12px; border-radius: 12px; overflow:auto;
     }
-
-    .incorrect {
-      border-color: #fca5a5;
-      background: #fef2f2;
-    }
-
-    .muted {
-      color: var(--muted);
-    }
-
-    .result {
-      font-size: 1.05rem;
-      line-height: 1.7;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 14px;
-      background: white;
-      border-radius: 14px;
-      overflow: hidden;
-    }
-
-    th, td {
-      padding: 12px 10px;
-      border-bottom: 1px solid #e5e7eb;
-      text-align: left;
-      font-size: 0.96rem;
-    }
-
-    th {
-      background: #eff6ff;
-      color: #1e3a8a;
-    }
-
-    .hidden { display: none; }
-
-    .footer-note {
-      font-size: 0.92rem;
-      color: var(--muted);
-      margin-top: 10px;
-    }
-
-    .balance-view {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-      margin-top: 14px;
-    }
-
-    .balance-column {
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      background: #ffffff;
-      overflow: hidden;
-      box-shadow: 0 8px 22px rgba(31, 41, 55, 0.05);
-    }
-
-    .balance-column-title {
-      margin: 0;
-      padding: 14px 16px;
-      background: #eaf2ff;
-      color: #163b88;
-      font-size: 1.1rem;
-    }
-
-    .balance-block {
-      padding: 14px 16px;
-      border-top: 1px solid #e5e7eb;
-    }
-
-    .balance-block h4 {
-      margin: 0 0 10px 0;
-      font-size: 1rem;
-      color: #1f2937;
-    }
-
-    .balance-list {
-      margin: 0;
-      padding-left: 18px;
-      line-height: 1.7;
-    }
-
-    @media (max-width: 900px) {
-      .balance-view {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 700px) {
-      .container { padding: 14px; }
-      h1 { font-size: 1.55rem; }
-    }
+    .kpi { display:flex; flex-wrap:wrap; gap: 10px; align-items:center; }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <section class="card">
-      <h1>Masas patrimoniales: juego de clasificación</h1>
-      <p class="subtitle">
-        Arrastra cada elemento patrimonial a su masa correspondiente. La aplicación guarda el mejor intento de cada alumna o alumno en este navegador.
-      </p>
-    </section>
+<div class="wrap">
 
-    <section class="card">
-      <div class="grid grid-2">
-        <div>
-          <label for="studentName">Nombre del alumno o alumna</label>
-          <input id="studentName" type="text" placeholder="Escribe aquí el nombre" maxlength="60" />
-        </div>
-        <div>
-          <label for="levelSelect">Nivel</label>
-          <select id="levelSelect">
-            <option value="1">Nivel 1 · básico</option>
-            <option value="2">Nivel 2 · intermedio</option>
-            <option value="3">Nivel 3 · avanzado</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="toolbar" style="margin-top:16px;">
-        <button class="btn-primary" id="startBtn">Empezar actividad</button>
-        <button class="btn-secondary" id="checkBtn" disabled>Corregir</button>
-        <button class="btn-secondary" id="resetBtn" disabled>Reiniciar nivel</button>
-        <button class="btn-secondary" id="showRecordsBtn">Ver mejores notas</button>
-        <button class="btn-danger" id="clearRecordsBtn">Borrar registros</button>
-      </div>
-
-      <div style="margin-top: 10px;">
-        <span class="pill" id="levelInfo">Selecciona un nivel</span>
-        <span class="pill" id="studentInfo">Sin alumno registrado</span>
-      </div>
-    </section>
-
-    <section class="card hidden" id="gameSection">
-      <h2>Elementos patrimoniales por clasificar</h2>
-      <p class="muted">Primero aparecen todos los elementos mezclados. Después deben arrastrarse a la masa patrimonial adecuada.</p>
-      <div class="bank" id="bank" ondragover="allowDrop(event)" ondrop="dropItem(event, 'bank')"></div>
-    </section>
-
-    <section class="grid grid-5 hidden" id="zonesSection">
-      <div class="card dropzone" id="activo_corriente" ondragover="allowDrop(event)" ondrop="dropItem(event, 'activo_corriente')">
-        <h3>Activo corriente</h3>
-      </div>
-      <div class="card dropzone" id="activo_no_corriente" ondragover="allowDrop(event)" ondrop="dropItem(event, 'activo_no_corriente')">
-        <h3>Activo no corriente</h3>
-      </div>
-      <div class="card dropzone" id="fondos_propios" ondragover="allowDrop(event)" ondrop="dropItem(event, 'fondos_propios')">
-        <h3>Fondos propios</h3>
-      </div>
-      <div class="card dropzone" id="pasivo_corriente" ondragover="allowDrop(event)" ondrop="dropItem(event, 'pasivo_corriente')">
-        <h3>Pasivo corriente</h3>
-      </div>
-      <div class="card dropzone" id="pasivo_no_corriente" ondragover="allowDrop(event)" ondrop="dropItem(event, 'pasivo_no_corriente')">
-        <h3>Pasivo no corriente</h3>
-      </div>
-    </section>
-
-    <section class="card hidden" id="resultSection">
-      <h2>Resultado</h2>
-      <div class="result" id="resultText"></div>
-    </section>
-
-    <section class="card hidden" id="solutionSection">
-      <h2>Estructura correcta del balance</h2>
-      <p class="muted">Una vez corregida la actividad, aquí se muestra la estructura correcta del balance en su formato habitual: activo a la izquierda y fondos propios y pasivo a la derecha.</p>
-      <div id="solutionBalance"></div>
-    </section>
-
-    <section class="card" id="recordsSection">
-      <h2>Mejores notas guardadas</h2>
-      <div id="recordsTableWrap"></div>
-      <p class="footer-note">
-        Estos datos se guardan solo en el navegador y en el dispositivo en el que se usa la actividad. Si más adelante se quiere un registro común para toda la clase, habrá que conectarlo a una base de datos o a un formulario externo.
-      </p>
-    </section>
+  <div class="card">
+    <h1>Balance: clasificar y ordenar</h1>
+    <div class="muted">
+      Coloca cada elemento en su masa patrimonial. En el <b>Activo</b>, de <b>menor (arriba) a mayor liquidez</b>.
+      En el <b>Pasivo</b>, de <b>menor (arriba) a mayor exigibilidad</b>.
+    </div>
   </div>
 
-  <script>
-    const DATA = {
-      1: [
-        { name: 'Caja', category: 'activo_corriente' },
-        { name: 'Bancos c/c', category: 'activo_corriente' },
-        { name: 'Mercaderías', category: 'activo_corriente' },
-        { name: 'Clientes', category: 'activo_corriente' },
-        { name: 'Maquinaria', category: 'activo_no_corriente' },
-        { name: 'Mobiliario', category: 'activo_no_corriente' },
-        { name: 'Capital social', category: 'fondos_propios' },
-        { name: 'Reservas', category: 'fondos_propios' },
-        { name: 'Proveedores', category: 'pasivo_corriente' },
-        { name: 'Hacienda Pública acreedora', category: 'pasivo_corriente' },
-        { name: 'Deudas a largo plazo con entidades de crédito', category: 'pasivo_no_corriente' },
-        { name: 'Préstamos a largo plazo', category: 'pasivo_no_corriente' }
-      ],
-      2: [
-        { name: 'Caja', category: 'activo_corriente' },
-        { name: 'Bancos c/c', category: 'activo_corriente' },
-        { name: 'Mercaderías', category: 'activo_corriente' },
-        { name: 'Clientes', category: 'activo_corriente' },
-        { name: 'Deudores', category: 'activo_corriente' },
-        { name: 'Inversiones financieras a corto plazo', category: 'activo_corriente' },
-        { name: 'Equipos para procesos de información', category: 'activo_no_corriente' },
-        { name: 'Construcciones', category: 'activo_no_corriente' },
-        { name: 'Elementos de transporte', category: 'activo_no_corriente' },
-        { name: 'Aplicaciones informáticas', category: 'activo_no_corriente' },
-        { name: 'Capital social', category: 'fondos_propios' },
-        { name: 'Reservas voluntarias', category: 'fondos_propios' },
-        { name: 'Resultado del ejercicio', category: 'fondos_propios' },
-        { name: 'Proveedores', category: 'pasivo_corriente' },
-        { name: 'Acreedores por prestación de servicios', category: 'pasivo_corriente' },
-        { name: 'Organismos de la Seguridad Social acreedores', category: 'pasivo_corriente' },
-        { name: 'Deudas a corto plazo con entidades de crédito', category: 'pasivo_corriente' },
-        { name: 'Deudas a largo plazo con entidades de crédito', category: 'pasivo_no_corriente' },
-        { name: 'Obligaciones y bonos a largo plazo', category: 'pasivo_no_corriente' },
-        { name: 'Proveedores de inmovilizado a largo plazo', category: 'pasivo_no_corriente' }
-      ],
-      3: [
-        { name: 'Caja', category: 'activo_corriente' },
-        { name: 'Bancos c/c', category: 'activo_corriente' },
-        { name: 'Mercaderías', category: 'activo_corriente' },
-        { name: 'Clientes', category: 'activo_corriente' },
-        { name: 'Clientes, efectos comerciales a cobrar', category: 'activo_corriente' },
-        { name: 'Deudores varios', category: 'activo_corriente' },
-        { name: 'Hacienda Pública deudora', category: 'activo_corriente' },
-        { name: 'Inversiones financieras temporales', category: 'activo_corriente' },
-        { name: 'Terrenos y bienes naturales', category: 'activo_no_corriente' },
-        { name: 'Construcciones', category: 'activo_no_corriente' },
-        { name: 'Maquinaria', category: 'activo_no_corriente' },
-        { name: 'Mobiliario', category: 'activo_no_corriente' },
-        { name: 'Equipos para procesos de información', category: 'activo_no_corriente' },
-        { name: 'Aplicaciones informáticas', category: 'activo_no_corriente' },
-        { name: 'Propiedad industrial', category: 'activo_no_corriente' },
-        { name: 'Inversiones financieras a largo plazo', category: 'activo_no_corriente' },
-        { name: 'Capital social', category: 'fondos_propios' },
-        { name: 'Prima de emisión', category: 'fondos_propios' },
-        { name: 'Reservas', category: 'fondos_propios' },
-        { name: 'Resultado del ejercicio', category: 'fondos_propios' },
-        { name: 'Subvenciones, donaciones y legados', category: 'fondos_propios' },
-        { name: 'Proveedores', category: 'pasivo_corriente' },
-        { name: 'Proveedores, efectos comerciales a pagar', category: 'pasivo_corriente' },
-        { name: 'Acreedores por prestación de servicios', category: 'pasivo_corriente' },
-        { name: 'Remuneraciones pendientes de pago', category: 'pasivo_corriente' },
-        { name: 'Hacienda Pública acreedora', category: 'pasivo_corriente' },
-        { name: 'Organismos de la Seguridad Social acreedores', category: 'pasivo_corriente' },
-        { name: 'Deudas a corto plazo con entidades de crédito', category: 'pasivo_corriente' },
-        { name: 'Deudas a largo plazo con entidades de crédito', category: 'pasivo_no_corriente' },
-        { name: 'Empréstito a largo plazo', category: 'pasivo_no_corriente' },
-        { name: 'Proveedores de inmovilizado a largo plazo', category: 'pasivo_no_corriente' },
-        { name: 'Fianzas recibidas a largo plazo', category: 'pasivo_no_corriente' }
-      ]
-    };
+  <div class="card">
+    <div class="row">
+      <div>
+        <label>Nombre y apellidos</label>
+        <input id="alumno" placeholder="Ej: Laura García López" autocomplete="name">
+      </div>
 
-    const CATEGORY_NAMES = {
-      activo_corriente: 'Activo corriente',
-      activo_no_corriente: 'Activo no corriente',
-      fondos_propios: 'Fondos propios',
-      pasivo_corriente: 'Pasivo corriente',
-      pasivo_no_corriente: 'Pasivo no corriente'
-    };
+      <div>
+        <label>Número de elementos</label>
+        <select id="num">
+          <option value="15">15</option>
+          <option value="20" selected>20</option>
+          <option value="30">30</option>
+          <option value="35">35</option>
+          <option value="50">Todos (50)</option>
+        </select>
+      </div>
 
-    const studentNameInput = document.getElementById('studentName');
-    const levelSelect = document.getElementById('levelSelect');
-    const startBtn = document.getElementById('startBtn');
-    const checkBtn = document.getElementById('checkBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const showRecordsBtn = document.getElementById('showRecordsBtn');
-    const clearRecordsBtn = document.getElementById('clearRecordsBtn');
-    const levelInfo = document.getElementById('levelInfo');
-    const studentInfo = document.getElementById('studentInfo');
-    const bank = document.getElementById('bank');
-    const resultSection = document.getElementById('resultSection');
-    const resultText = document.getElementById('resultText');
-    const gameSection = document.getElementById('gameSection');
-    const zonesSection = document.getElementById('zonesSection');
-    const recordsTableWrap = document.getElementById('recordsTableWrap');
-    const solutionSection = document.getElementById('solutionSection');
-    const solutionBalance = document.getElementById('solutionBalance');
+      <div style="display:grid; gap:10px;">
+        <button id="btnStart">Empezar</button>
+        <button id="btnFinish" class="secondary" disabled>Finalizar y corregir</button>
+      </div>
+    </div>
+  </div>
 
-    let currentItems = [];
-    let currentLevel = 1;
-    let currentStudent = '';
-    let attemptNumber = 0;
+  <div class="card" id="zonaColocacion" style="display:none;">
+    <div class="kpi">
+      <span class="pill" id="estado">—</span>
+      <span class="pill" id="pendientes">—</span>
+    </div>
+    <div style="height:10px;"></div>
 
-    function shuffle(array) {
-      const copy = [...array];
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
-    }
+    <div class="grid">
+      <!-- Panel de colocación -->
+      <div class="box">
+        <h2>Elemento actual</h2>
+        <div class="muted">Selecciona dónde colocarlo y pulsa <b>Colocar</b>.</div>
+        <div style="height:10px;"></div>
 
-    function normalizeName(name) {
-      return name.trim().replace(/\s+/g, ' ');
-    }
+        <div class="box" style="background:white;">
+          <div><strong id="elemActual">—</strong></div>
+          <div class="muted" id="hintActual">—</div>
+        </div>
 
-    function allowDrop(event) {
-      event.preventDefault();
-    }
+        <div style="height:10px;"></div>
 
-    function dragItem(event) {
-      event.dataTransfer.setData('text/plain', event.target.id);
-    }
+        <label>¿Dónde lo colocas?</label>
+        <select id="destino">
+          <optgroup label="ACTIVO (orden: menor → mayor liquidez)">
+            <option value="ANC">Activo no corriente</option>
+            <option value="AC">Activo corriente</option>
+          </optgroup>
+          <optgroup label="PATRIMONIO NETO">
+            <option value="PN">Patrimonio neto</option>
+          </optgroup>
+          <optgroup label="PASIVO (orden: menor → mayor exigibilidad)">
+            <option value="PNC">Pasivo no corriente</option>
+            <option value="PC">Pasivo corriente</option>
+          </optgroup>
+        </select>
 
-    function dropItem(event, zoneId) {
-      event.preventDefault();
-      const itemId = event.dataTransfer.getData('text/plain');
-      const item = document.getElementById(itemId);
-      if (!item) return;
-      document.getElementById(zoneId).appendChild(item);
-    }
+        <div style="height:10px;"></div>
 
-    window.allowDrop = allowDrop;
-    window.dropItem = dropItem;
-    window.dragItem = dragItem;
+        <button id="btnPlace">Colocar en la plantilla</button>
 
-    function makeItemElement(item, index) {
-      const div = document.createElement('div');
-      div.className = 'item';
-      div.id = `item_${index}_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-      div.draggable = true;
-      div.ondragstart = dragItem;
-      div.dataset.correctCategory = item.category;
-      div.textContent = item.name;
-      return div;
-    }
+        <div style="height:12px;"></div>
+        <div class="muted small">
+          Puedes ajustar el orden dentro de cada bloque con ↑ ↓ (lo que pongas arriba se considera “menor liquidez/exigibilidad”).
+        </div>
+      </div>
 
-    function clearZones() {
-      const zoneIds = ['bank', 'activo_corriente', 'activo_no_corriente', 'fondos_propios', 'pasivo_corriente', 'pasivo_no_corriente'];
-      zoneIds.forEach(id => {
-        const zone = document.getElementById(id);
-        if (id === 'bank') {
-          zone.innerHTML = '';
-        } else {
-          const title = zone.querySelector('h3');
-          zone.innerHTML = '';
-          zone.appendChild(title);
-        }
-      });
-    }
+      <!-- Plantilla de balance -->
+      <div class="box">
+        <h2>Plantilla de balance</h2>
+        <div class="muted">Ordena dentro de cada bloque.</div>
+        <div style="height:10px;"></div>
 
-    function startGame() {
-      const name = normalizeName(studentNameInput.value);
-      if (!name) {
-        alert('Debes escribir el nombre del alumno o alumna antes de empezar.');
-        studentNameInput.focus();
-        return;
-      }
+        <div class="cols3">
+          <div class="box">
+            <h3>ACTIVO</h3>
 
-      currentStudent = name;
-      currentLevel = Number(levelSelect.value);
-      currentItems = shuffle(DATA[currentLevel]);
-      attemptNumber += 1;
-
-      clearZones();
-      resultSection.classList.add('hidden');
-      gameSection.classList.remove('hidden');
-      zonesSection.classList.remove('hidden');
-
-      currentItems.forEach((item, index) => {
-        bank.appendChild(makeItemElement(item, index));
-      });
-
-      levelInfo.textContent = `Nivel ${currentLevel} · ${DATA[currentLevel].length} elementos`;
-      studentInfo.textContent = `Alumno/a: ${currentStudent}`;
-      checkBtn.disabled = false;
-      resetBtn.disabled = false;
-    }
-
-    function gradeGame() {
-      const zones = ['activo_corriente', 'activo_no_corriente', 'fondos_propios', 'pasivo_corriente', 'pasivo_no_corriente'];
-      let total = currentItems.length;
-      let correct = 0;
-      let details = [];
-
-      document.querySelectorAll('.item').forEach(item => {
-        item.classList.remove('correct', 'incorrect');
-        const parentId = item.parentElement.id;
-        const expected = item.dataset.correctCategory;
-        if (parentId === expected) {
-          item.classList.add('correct');
-          correct += 1;
-        } else {
-          item.classList.add('incorrect');
-          details.push(`“${item.textContent}” debía ir en ${CATEGORY_NAMES[expected]}.`);
-        }
-      });
-
-      const score10 = ((correct / total) * 10).toFixed(2);
-      const percent = ((correct / total) * 100).toFixed(1);
-      saveRecord(currentStudent, currentLevel, Number(score10), correct, total);
-
-      resultText.innerHTML = `
-        <p><strong>${currentStudent}</strong>, el resultado del nivel ${currentLevel} es:</p>
-        <p><strong>${correct}</strong> aciertos de <strong>${total}</strong> elementos.</p>
-        <p>Porcentaje de acierto: <strong>${percent}%</strong>.</p>
-        <p>Calificación sobre 10: <strong>${score10}</strong>.</p>
-        ${details.length ? `<p><strong>Elementos incorrectos:</strong></p><ul>${details.map(d => `<li>${d}</li>`).join('')}</ul>` : '<p><strong>¡Enhorabuena! Todo está correctamente clasificado.</strong></p>'}
-      `;
-
-      renderSolutionBalance();
-      resultSection.classList.remove('hidden');
-      solutionSection.classList.remove('hidden');
-      renderRecords();
-    }
-
-    function resetLevel() {
-      if (!currentStudent) return;
-      solutionSection.classList.add('hidden');
-      startGame();
-    }
-
-    function renderSolutionBalance() {
-      const items = DATA[currentLevel];
-      const grouped = {
-        activo_corriente: [],
-        activo_no_corriente: [],
-        fondos_propios: [],
-        pasivo_corriente: [],
-        pasivo_no_corriente: []
-      };
-
-      items.forEach(item => grouped[item.category].push(item.name));
-      Object.keys(grouped).forEach(key => grouped[key].sort((a, b) => a.localeCompare(b, 'es')));
-
-      solutionBalance.innerHTML = `
-        <div class="balance-view">
-          <div class="balance-column">
-            <h3 class="balance-column-title">ACTIVO</h3>
-            <div class="balance-block">
-              <h4>Activo no corriente</h4>
-              <ul class="balance-list">
-                ${grouped.activo_no_corriente.map(item => `<li>${item}</li>`).join('')}
-              </ul>
+            <div class="box" style="margin-top:8px;">
+              <div class="muted"><b>Activo no corriente</b> (menor liquidez)</div>
+              <ul class="itemlist" id="list_ANC"></ul>
             </div>
-            <div class="balance-block">
-              <h4>Activo corriente</h4>
-              <ul class="balance-list">
-                ${grouped.activo_corriente.map(item => `<li>${item}</li>`).join('')}
-              </ul>
+
+            <div class="box" style="margin-top:8px;">
+              <div class="muted"><b>Activo corriente</b> (mayor liquidez)</div>
+              <ul class="itemlist" id="list_AC"></ul>
             </div>
           </div>
 
-          <div class="balance-column">
-            <h3 class="balance-column-title">PATRIMONIO NETO Y PASIVO</h3>
-            <div class="balance-block">
-              <h4>Fondos propios</h4>
-              <ul class="balance-list">
-                ${grouped.fondos_propios.map(item => `<li>${item}</li>`).join('')}
-              </ul>
+          <div class="box">
+            <h3>PATRIMONIO NETO</h3>
+            <div class="box" style="margin-top:8px;">
+              <div class="muted"><b>Patrimonio neto</b></div>
+              <ul class="itemlist" id="list_PN"></ul>
             </div>
-            <div class="balance-block">
-              <h4>Pasivo no corriente</h4>
-              <ul class="balance-list">
-                ${grouped.pasivo_no_corriente.map(item => `<li>${item}</li>`).join('')}
-              </ul>
+          </div>
+
+          <div class="box">
+            <h3>PASIVO</h3>
+
+            <div class="box" style="margin-top:8px;">
+              <div class="muted"><b>Pasivo no corriente</b> (menor exigibilidad)</div>
+              <ul class="itemlist" id="list_PNC"></ul>
             </div>
-            <div class="balance-block">
-              <h4>Pasivo corriente</h4>
-              <ul class="balance-list">
-                ${grouped.pasivo_corriente.map(item => `<li>${item}</li>`).join('')}
-              </ul>
+
+            <div class="box" style="margin-top:8px;">
+              <div class="muted"><b>Pasivo corriente</b> (mayor exigibilidad)</div>
+              <ul class="itemlist" id="list_PC"></ul>
             </div>
           </div>
         </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="zonaResultados" style="display:none;">
+    <h2>Corrección</h2>
+    <div id="resumen"></div>
+    <div style="height:10px;"></div>
+
+    <div class="box">
+      <h3>Errores detectados</h3>
+      <div class="result" id="erroresTxt">—</div>
+    </div>
+
+    <div style="height:12px;"></div>
+
+    <div class="box">
+      <h3>Balance correcto (ordenado)</h3>
+      <div class="muted">Este es el balance correctamente clasificado y ordenado para los elementos de este intento.</div>
+      <div style="height:10px;"></div>
+      <div class="result" id="correctoTxt">—</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ==========================================================
+   BANCO DE ELEMENTOS (50) + CLASIFICACIÓN + ORDEN
+   - bucket: ANC / AC / PN / PNC / PC
+   - rank: orden interno (menor->mayor liquidez/exigibilidad)
+   ========================================================== */
+
+const BANK = [
+  // ACTIVO NO CORRIENTE (menor liquidez) — rangos 10-29
+  { name:"Aplicaciones informáticas", bucket:"ANC", rank:10, hint:"Intangible: muy poca liquidez." },
+  { name:"Propiedad industrial", bucket:"ANC", rank:11, hint:"Intangible: muy poca liquidez." },
+  { name:"Patentes", bucket:"ANC", rank:12, hint:"Intangible: muy poca liquidez." },
+  { name:"Fondo de comercio", bucket:"ANC", rank:13, hint:"Intangible: muy poca liquidez." },
+  { name:"Terrenos y bienes naturales", bucket:"ANC", rank:14, hint:"Inmovilizado material: baja liquidez." },
+  { name:"Construcciones", bucket:"ANC", rank:15, hint:"Inmovilizado material: baja liquidez." },
+  { name:"Instalaciones técnicas", bucket:"ANC", rank:16, hint:"Inmovilizado material: baja liquidez." },
+  { name:"Maquinaria", bucket:"ANC", rank:17, hint:"Inmovilizado material: baja liquidez." },
+  { name:"Utillaje", bucket:"ANC", rank:18, hint:"Inmovilizado material: baja liquidez." },
+  { name:"Mobiliario", bucket:"ANC", rank:19, hint:"Inmovilizado material: baja liquidez." },
+  { name:"Equipos para procesos de información", bucket:"ANC", rank:20, hint:"Inmovilizado material: baja liquidez." },
+  { name:"Elementos de transporte", bucket:"ANC", rank:21, hint:"Inmovilizado material: baja liquidez." },
+  { name:"Inmovilizado en curso", bucket:"ANC", rank:22, hint:"Todavía no está en uso: muy poca liquidez." },
+  { name:"Inversiones financieras a largo plazo", bucket:"ANC", rank:24, hint:"Inmovilizado financiero: baja liquidez." },
+
+  // ACTIVO CORRIENTE (mayor liquidez) — rangos 30-49
+  { name:"Existencias", bucket:"AC", rank:30, hint:"Existencias: menos líquido dentro del corriente." },
+  { name:"Mercaderías", bucket:"AC", rank:31, hint:"Existencias: menos líquido dentro del corriente." },
+  { name:"Materias primas", bucket:"AC", rank:32, hint:"Existencias: menos líquido dentro del corriente." },
+  { name:"Productos en curso", bucket:"AC", rank:33, hint:"Existencias: menos líquido dentro del corriente." },
+  { name:"Productos terminados", bucket:"AC", rank:34, hint:"Existencias: menos líquido dentro del corriente." },
+  { name:"Envases y embalajes", bucket:"AC", rank:35, hint:"Existencias: menos líquido dentro del corriente." },
+  { name:"Anticipos a proveedores", bucket:"AC", rank:36, hint:"Derecho a recibir bienes/servicios: realizable." },
+  { name:"Clientes", bucket:"AC", rank:38, hint:"Realizable: cobro de ventas." },
+  { name:"Clientes, efectos comerciales a cobrar", bucket:"AC", rank:39, hint:"Realizable: efectos a cobrar." },
+  { name:"Efectos comerciales a cobrar", bucket:"AC", rank:40, hint:"Realizable: efectos a cobrar." },
+  { name:"Deudores", bucket:"AC", rank:41, hint:"Realizable: cobros pendientes." },
+  { name:"Deudores varios", bucket:"AC", rank:42, hint:"Realizable: cobros pendientes." },
+  { name:"Hacienda Pública deudora", bucket:"AC", rank:43, hint:"Realizable: impuestos a recuperar." },
+  { name:"Inversiones financieras a corto plazo", bucket:"AC", rank:44, hint:"Casi dinero: alta liquidez." },
+  { name:"Bancos", bucket:"AC", rank:47, hint:"Disponible: muy líquido." },
+  { name:"Caja", bucket:"AC", rank:48, hint:"Disponible: el más líquido." },
+
+  // PATRIMONIO NETO — rangos 50-59 (orden interno no crítico, pero lo fijamos)
+  { name:"Capital social", bucket:"PN", rank:50, hint:"Patrimonio neto." },
+  { name:"Reservas legales", bucket:"PN", rank:51, hint:"Patrimonio neto." },
+  { name:"Reservas voluntarias", bucket:"PN", rank:52, hint:"Patrimonio neto." },
+  { name:"Resultados de ejercicios anteriores", bucket:"PN", rank:53, hint:"Patrimonio neto." },
+  { name:"Resultado del ejercicio", bucket:"PN", rank:54, hint:"Patrimonio neto." },
+  { name:"Prima de emisión", bucket:"PN", rank:55, hint:"Patrimonio neto." },
+  { name:"Subvenciones oficiales de capital", bucket:"PN", rank:56, hint:"Patrimonio neto (subvenciones)." },
+  { name:"Capital pendiente de desembolso", bucket:"PN", rank:57, hint:"Patrimonio neto (según enfoque didáctico habitual)." },
+
+  // PASIVO NO CORRIENTE (menor exigibilidad) — rangos 60-69
+  { name:"Empréstitos", bucket:"PNC", rank:60, hint:"Deuda a largo plazo: poca exigibilidad inmediata." },
+  { name:"Préstamos a largo plazo", bucket:"PNC", rank:61, hint:"Deuda a largo plazo." },
+  { name:"Deudas a largo plazo con entidades de crédito", bucket:"PNC", rank:62, hint:"Deuda a largo plazo." },
+  { name:"Proveedores de inmovilizado a largo plazo", bucket:"PNC", rank:63, hint:"Obligación a largo plazo." },
+  { name:"Provisiones a largo plazo", bucket:"PNC", rank:64, hint:"Obligaciones futuras: largo plazo." },
+  { name:"Pasivo por impuesto diferido", bucket:"PNC", rank:65, hint:"Obligación fiscal futura: largo plazo." },
+
+  // PASIVO CORRIENTE (mayor exigibilidad) — rangos 70-79
+  { name:"Proveedores", bucket:"PC", rank:70, hint:"Exigible a corto: proveedores." },
+  { name:"Acreedores", bucket:"PC", rank:71, hint:"Exigible a corto." },
+  { name:"Deudas a corto plazo con entidades de crédito", bucket:"PC", rank:72, hint:"Exigible a corto: bancos." },
+  { name:"Hacienda Pública acreedora", bucket:"PC", rank:73, hint:"Exigible a corto: impuestos." },
+  { name:"Organismos de la Seguridad Social acreedores", bucket:"PC", rank:74, hint:"Exigible a corto: SS." },
+  { name:"Remuneraciones pendientes de pago", bucket:"PC", rank:75, hint:"Exigible a muy corto: salarios." }
+];
+
+const BY_NAME = Object.fromEntries(BANK.map(x => [x.name, x]));
+const ALL_NAMES = BANK.map(x => x.name);
+
+const BUCKETS = [
+  { key:"ANC", label:"Activo no corriente" },
+  { key:"AC", label:"Activo corriente" },
+  { key:"PN", label:"Patrimonio neto" },
+  { key:"PNC", label:"Pasivo no corriente" },
+  { key:"PC", label:"Pasivo corriente" }
+];
+
+const NOTA_MAX = 10;
+
+let attempt = null; // { alumno, items[], idx, placed: {bucket: [names...] } }
+
+const $ = (id) => document.getElementById(id);
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function initAttempt(){
+  const alumno = $("alumno").value.trim();
+  if(alumno.length < 3){
+    alert("Escribe nombre y apellidos (mínimo 3 caracteres).");
+    return;
+  }
+  const n = parseInt($("num").value, 10);
+  const items = shuffle(ALL_NAMES).slice(0, Math.min(n, ALL_NAMES.length));
+
+  attempt = {
+    alumno,
+    items,
+    idx: 0,
+    placed: { ANC:[], AC:[], PN:[], PNC:[], PC:[] }
+  };
+
+  $("zonaResultados").style.display = "none";
+  $("zonaColocacion").style.display = "";
+  $("btnFinish").disabled = true;
+
+  renderCurrent();
+  renderLists();
+  updateBadges();
+}
+
+function updateBadges(){
+  const total = attempt.items.length;
+  const placedCount = BUCKETS.reduce((s,b)=> s + attempt.placed[b.key].length, 0);
+  $("estado").textContent = `Alumno: ${attempt.alumno}`;
+  $("pendientes").textContent = `Colocados: ${placedCount}/${total}`;
+  $("btnFinish").disabled = placedCount !== total;
+}
+
+function renderCurrent(){
+  const total = attempt.items.length;
+  if(attempt.idx >= total){
+    // si ya pasó de todos, mostramos el primero no colocado
+    const next = attempt.items.find(name => !isPlaced(name));
+    if(next){
+      $("elemActual").textContent = next;
+      $("hintActual").textContent = BY_NAME[next].hint || "";
+      return;
+    }
+    $("elemActual").textContent = "✅ Todo colocado";
+    $("hintActual").textContent = "Ya puedes finalizar y corregir.";
+    return;
+  }
+
+  // buscar el siguiente no colocado a partir del idx
+  let i = attempt.idx;
+  while(i < total && isPlaced(attempt.items[i])) i++;
+  attempt.idx = i;
+
+  const name = (i < total) ? attempt.items[i] : null;
+  if(!name){
+    $("elemActual").textContent = "✅ Todo colocado";
+    $("hintActual").textContent = "Ya puedes finalizar y corregir.";
+    return;
+  }
+  $("elemActual").textContent = name;
+  $("hintActual").textContent = BY_NAME[name].hint || "";
+}
+
+function isPlaced(name){
+  return BUCKETS.some(b => attempt.placed[b.key].includes(name));
+}
+
+function removeFromAll(name){
+  BUCKETS.forEach(b => {
+    const arr = attempt.placed[b.key];
+    const idx = arr.indexOf(name);
+    if(idx >= 0) arr.splice(idx, 1);
+  });
+}
+
+function placeCurrent(){
+  const name = $("elemActual").textContent;
+  if(!name || name.startsWith("✅")) return;
+
+  const dest = $("destino").value; // ANC/AC/PN/PNC/PC
+  removeFromAll(name);
+  attempt.placed[dest].push(name);
+
+  attempt.idx += 1;
+  renderCurrent();
+  renderLists();
+  updateBadges();
+}
+
+function moveItem(bucket, idx, dir){
+  const arr = attempt.placed[bucket];
+  const j = idx + dir;
+  if(j < 0 || j >= arr.length) return;
+  [arr[idx], arr[j]] = [arr[j], arr[idx]];
+  renderLists();
+}
+
+function deleteItem(bucket, idx){
+  attempt.placed[bucket].splice(idx, 1);
+  renderCurrent();
+  renderLists();
+  updateBadges();
+}
+
+function renderLists(){
+  for(const b of BUCKETS){
+    const ul = $("list_" + b.key);
+    ul.innerHTML = "";
+    attempt.placed[b.key].forEach((name, idx) => {
+      const li = document.createElement("li");
+      li.className = "item";
+      li.innerHTML = `
+        <div style="min-width:0;">
+          <strong>${name}</strong>
+          <div class="muted" style="font-size:12px;">${b.label}</div>
+        </div>
+        <div class="actions">
+          <button class="mini up" title="Subir">↑</button>
+          <button class="mini down" title="Bajar">↓</button>
+          <button class="mini del" title="Quitar">✕</button>
+        </div>
       `;
-    }
+      const [btnUp, btnDown, btnDel] = li.querySelectorAll("button");
+      btnUp.onclick = () => moveItem(b.key, idx, -1);
+      btnDown.onclick = () => moveItem(b.key, idx, +1);
+      btnDel.onclick = () => deleteItem(b.key, idx);
+      ul.appendChild(li);
+    });
+  }
+}
 
-    function getRecords() {
-      try {
-        return JSON.parse(localStorage.getItem('balanceRecords') || '[]');
-      } catch {
-        return [];
+function sortCorrectForBucket(bucketKey){
+  // Orden correcto por rank (y por nombre para empates)
+  return [...attempt.items]
+    .filter(n => BY_NAME[n].bucket === bucketKey)
+    .sort((a,b) => (BY_NAME[a].rank - BY_NAME[b].rank) || a.localeCompare(b, "es"));
+}
+
+function grade(){
+  const total = attempt.items.length;
+
+  // Construimos mapa: dónde lo puso el alumno
+  const studentBucket = {};
+  BUCKETS.forEach(b => attempt.placed[b.key].forEach(n => studentBucket[n] = b.key));
+
+  const mistakes = [];
+  let correct = 0;
+
+  // Para orden: comparamos secuencia alumno vs secuencia correcta en cada bucket.
+  for(const b of BUCKETS){
+    const correctSeq = sortCorrectForBucket(b.key); // SOLO elementos de este intento que van aquí
+    const studentSeq = attempt.placed[b.key];
+
+    // 1) elementos que están en bucket incorrecto
+    for(const n of attempt.items){
+      const expectedB = BY_NAME[n].bucket;
+      const gotB = studentBucket[n];
+      if(!gotB){
+        mistakes.push(`SIN COLOCAR: ${n} → debería ir en ${labelBucket(expectedB)}.`);
+      } else if(gotB !== expectedB){
+        mistakes.push(`MASA INCORRECTA: ${n} → pusiste ${labelBucket(gotB)}, correcta: ${labelBucket(expectedB)}.`);
       }
     }
 
-    function saveRecords(records) {
-      localStorage.setItem('balanceRecords', JSON.stringify(records));
-    }
+    // 2) orden dentro del bucket: posición exacta comparando con el orden correcto
+    // Solo evaluamos orden si el alumno lo puso en el bucket correcto.
+    const studentCorrectOnly = studentSeq.filter(n => BY_NAME[n].bucket === b.key);
+    const correctOnly = correctSeq;
 
-    function saveRecord(student, level, score, correct, total) {
-      const records = getRecords();
-      const date = new Date().toLocaleString('es-ES');
-      const existing = records.find(r => r.student.toLowerCase() === student.toLowerCase() && r.level === level);
-
-      if (!existing) {
-        records.push({ student, level, score, correct, total, date });
-      } else if (score > existing.score) {
-        existing.score = score;
-        existing.correct = correct;
-        existing.total = total;
-        existing.date = date;
+    // Si faltan o sobran, igualmente comparamos por índice hasta min
+    const len = Math.min(studentCorrectOnly.length, correctOnly.length);
+    for(let i=0;i<len;i++){
+      if(studentCorrectOnly[i] === correctOnly[i]){
+        // cuenta como correcto (masa correcta y posición correcta dentro del bloque)
+        correct++;
+      } else {
+        // Solo marcamos error de orden si el elemento está en masa correcta
+        // y su posición no coincide con el balance ordenado
+        mistakes.push(`ORDEN: en ${labelBucket(b.key)}, en la posición ${i+1} pusiste "${studentCorrectOnly[i]}", debería ir "${correctOnly[i]}".`);
       }
-
-      records.sort((a, b) => {
-        if (a.student.toLowerCase() < b.student.toLowerCase()) return -1;
-        if (a.student.toLowerCase() > b.student.toLowerCase()) return 1;
-        return a.level - b.level;
-      });
-
-      saveRecords(records);
     }
 
-    function renderRecords() {
-      const records = getRecords();
-      if (!records.length) {
-        recordsTableWrap.innerHTML = '<p class="muted">Todavía no hay registros guardados.</p>';
-        return;
-      }
+    // Los correctos que estén en masa correcta pero fuera de esa comparación quedan incorrectos por orden
+    // (por ejemplo, si faltan/ sobran elementos o están permutados)
+    const extras = studentCorrectOnly.slice(len);
+    extras.forEach(n => mistakes.push(`ORDEN: "${n}" está en ${labelBucket(b.key)} pero no encaja en el orden correcto (revisa posiciones).`));
+    const missing = correctOnly.slice(len);
+    missing.forEach(n => mistakes.push(`ORDEN: falta colocar correctamente "${n}" en ${labelBucket(b.key)} según el orden.`));
+  }
 
-      recordsTableWrap.innerHTML = `
-        <table>
-          <thead>
-            <tr>
-              <th>Alumno/a</th>
-              <th>Nivel</th>
-              <th>Mejor nota</th>
-              <th>Aciertos</th>
-              <th>Última mejora guardada</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${records.map(r => `
-              <tr>
-                <td>${r.student}</td>
-                <td>${r.level}</td>
-                <td>${r.score.toFixed(2)}</td>
-                <td>${r.correct}/${r.total}</td>
-                <td>${r.date}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      `;
-    }
+  // Nota: porcentaje de aciertos basado en “masa+posición correctas”
+  const pct = (correct / total) * 100;
+  const nota = Math.round(((correct / total) * NOTA_MAX) * 100) / 100;
+  const errores = total - correct;
 
-    function clearRecords() {
-      const ok = confirm('¿Seguro que deseas borrar todos los registros guardados en este navegador?');
-      if (!ok) return;
-      localStorage.removeItem('balanceRecords');
-      renderRecords();
-    }
+  return { total, correct, errores, pct, nota, mistakes };
+}
 
-    startBtn.addEventListener('click', startGame);
-    checkBtn.addEventListener('click', gradeGame);
-    resetBtn.addEventListener('click', resetLevel);
-    showRecordsBtn.addEventListener('click', renderRecords);
-    clearRecordsBtn.addEventListener('click', clearRecords);
+function labelBucket(key){
+  const b = BUCKETS.find(x => x.key === key);
+  return b ? b.label : key;
+}
 
-    renderRecords();
-  </script>
+function buildCorrectBalanceText(){
+  const lines = [];
+  lines.push("ACTIVO (menor → mayor liquidez)");
+  lines.push("  Activo no corriente:");
+  sortCorrectForBucket("ANC").forEach(n => lines.push("    - " + n));
+  lines.push("  Activo corriente:");
+  sortCorrectForBucket("AC").forEach(n => lines.push("    - " + n));
+
+  lines.push("");
+  lines.push("PATRIMONIO NETO");
+  sortCorrectForBucket("PN").forEach(n => lines.push("  - " + n));
+
+  lines.push("");
+  lines.push("PASIVO (menor → mayor exigibilidad)");
+  lines.push("  Pasivo no corriente:");
+  sortCorrectForBucket("PNC").forEach(n => lines.push("    - " + n));
+  lines.push("  Pasivo corriente:");
+  sortCorrectForBucket("PC").forEach(n => lines.push("    - " + n));
+
+  return lines.join("\n");
+}
+
+function finish(){
+  const g = grade();
+
+  $("zonaResultados").style.display = "";
+  $("resumen").innerHTML = `
+    <div class="kpi">
+      <span class="pill">Aciertos: ${g.correct}/${g.total}</span>
+      <span class="pill">Errores: ${g.errores}/${g.total}</span>
+      <span class="pill">Acierto: ${g.pct.toFixed(1)}%</span>
+      <span class="pill">Nota: ${g.nota.toFixed(2)} / 10</span>
+    </div>
+    <div class="muted" style="margin-top:8px;">
+      Se considera <b>acierto</b> cuando el elemento está en la <b>masa correcta</b> y en la <b>posición correcta</b> dentro del bloque según liquidez/exigibilidad.
+    </div>
+  `;
+
+  const mistakesText = g.mistakes.length
+    ? g.mistakes.map(x => "- " + x).join("\n")
+    : "✅ Sin errores. Perfecto.";
+
+  $("erroresTxt").textContent = mistakesText;
+  $("correctoTxt").textContent = buildCorrectBalanceText();
+
+  // scroll hacia resultados
+  $("zonaResultados").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+/* ================== eventos ================== */
+
+$("btnStart").addEventListener("click", initAttempt);
+$("btnPlace").addEventListener("click", placeCurrent);
+$("btnFinish").addEventListener("click", finish);
+</script>
+
 </body>
 </html>
